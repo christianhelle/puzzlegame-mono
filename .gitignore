@@ -1,6 +1,7 @@
 # Squad: ignore runtime state (logs, inbox, sessions)
 .squad/orchestration-log/
 .squad/log/
+.squad/artifacts/
 .squad/decisions/inbox/
 .squad/sessions/
 .squad/.first-run
