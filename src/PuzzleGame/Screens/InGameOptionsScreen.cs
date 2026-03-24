@@ -1,8 +1,7 @@
 using System;
-using ChrisPuzzleGame.StateManagement;
 using Microsoft.Xna.Framework;
 
-namespace ChrisPuzzleGame.Screens;
+namespace PuzzleGame.Screens;
 
 public sealed class InGameOptionsScreen : MenuScreen
 {

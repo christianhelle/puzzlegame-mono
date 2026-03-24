@@ -1,11 +1,10 @@
 using System;
-using ChrisPuzzleGame.Persistence;
-using ChrisPuzzleGame.Screens;
-using ChrisPuzzleGame.StateManagement;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
+using PuzzleGame.Persistence;
+using PuzzleGame.Screens;
+using PuzzleGame.StateManagement;
 
-namespace ChrisPuzzleGame;
+namespace PuzzleGame;
 
 public sealed class PuzzleGame : Game
 {

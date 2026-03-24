@@ -2,13 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using ChrisPuzzleGame.Gameplay;
-using ChrisPuzzleGame.StateManagement;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using PuzzleGame.Gameplay;
+using PuzzleGame.StateManagement;
 
-namespace ChrisPuzzleGame.Screens;
+namespace PuzzleGame.Screens;
 
 public sealed class GameplayScreen : GameScreen
 {

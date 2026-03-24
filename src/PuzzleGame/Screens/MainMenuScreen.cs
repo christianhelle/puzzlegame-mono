@@ -1,8 +1,8 @@
 using System;
-using ChrisPuzzleGame.StateManagement;
 using Microsoft.Xna.Framework;
+using PuzzleGame.StateManagement;
 
-namespace ChrisPuzzleGame.Screens;
+namespace PuzzleGame.Screens;
 
 public sealed class MainMenuScreen : MenuScreen
 {

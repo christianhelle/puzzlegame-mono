@@ -5,7 +5,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace ChrisPuzzleGame.StateManagement;
+namespace PuzzleGame.StateManagement;
 
 public sealed class ScreenManager : DrawableGameComponent
 {

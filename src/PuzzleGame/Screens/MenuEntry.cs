@@ -1,9 +1,8 @@
 using System;
-using ChrisPuzzleGame.StateManagement;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace ChrisPuzzleGame.Screens;
+namespace PuzzleGame.Screens;
 
 public class MenuEntry
 {

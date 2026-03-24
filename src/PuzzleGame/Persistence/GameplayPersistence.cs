@@ -2,10 +2,10 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
-using ChrisPuzzleGame.Screens;
-using ChrisPuzzleGame.StateManagement;
+using PuzzleGame.Screens;
+using PuzzleGame.StateManagement;
 
-namespace ChrisPuzzleGame.Persistence;
+namespace PuzzleGame.Persistence;
 
 internal sealed class GameplayPersistence
 {

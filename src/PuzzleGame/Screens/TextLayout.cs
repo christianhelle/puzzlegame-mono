@@ -1,10 +1,10 @@
 using System;
 using System.Text;
-using ChrisPuzzleGame.StateManagement;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using PuzzleGame.StateManagement;
 
-namespace ChrisPuzzleGame.Screens;
+namespace PuzzleGame.Screens;
 
 internal static class TextLayout
 {

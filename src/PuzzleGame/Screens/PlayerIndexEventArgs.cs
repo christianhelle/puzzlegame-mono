@@ -1,7 +1,7 @@
 using System;
 using Microsoft.Xna.Framework;
 
-namespace ChrisPuzzleGame.Screens;
+namespace PuzzleGame.Screens;
 
 public sealed class PlayerIndexEventArgs(PlayerIndex playerIndex) : EventArgs
 {

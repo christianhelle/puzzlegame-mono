@@ -1,6 +1,6 @@
 using System;
 
-namespace ChrisPuzzleGame;
+namespace PuzzleGame;
 
 internal static class Program
 {

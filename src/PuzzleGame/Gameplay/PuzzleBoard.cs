@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace ChrisPuzzleGame.Gameplay;
+namespace PuzzleGame.Gameplay;
 
 internal sealed class PuzzleBoard
 {

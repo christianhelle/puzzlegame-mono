@@ -1,9 +1,9 @@
 using System;
-using ChrisPuzzleGame.StateManagement;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using PuzzleGame.StateManagement;
 
-namespace ChrisPuzzleGame.Screens;
+namespace PuzzleGame.Screens;
 
 public sealed class BackgroundScreen : GameScreen
 {

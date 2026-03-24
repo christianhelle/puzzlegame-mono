@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using Microsoft.Xna.Framework;
 
-namespace ChrisPuzzleGame.StateManagement;
+namespace PuzzleGame.StateManagement;
 
 public enum ScreenState
 {
