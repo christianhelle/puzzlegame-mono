@@ -14,3 +14,4 @@
 - Day 1: The original content set includes both Content\Penguins.jpg and Content\Puzzles\Penguins.jpg; keep the puzzle-sized image on the original `Penguins` asset name and compile the root image under `Originals/Penguins` to avoid collisions.
 - Day 1: The original Menu and Congratulations spritefonts target Segoe UI Mono and Kootenay, but the Windows build machine does not have those fonts installed, so the port uses Consolas and Georgia fallbacks to keep `dotnet build` dependable.
 - Day 1: UI persistence now saves resumable gameplay to `%LocalAppData%\ChrisPuzzleGame\gameplay-state.bin`, stages writes through a sibling `.tmp` file, and falls back to the normal main-menu startup if the save is missing or corrupt.
+- Day 1: GitHub CI should stay explicit and Windows-only for now: restore the trusted UI project and build `src\ChrisPuzzleGame.UI` so hosted validation exercises the same MonoGame content pipeline path as local development.
