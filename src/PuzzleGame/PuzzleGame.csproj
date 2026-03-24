@@ -8,70 +8,45 @@
     <UseWindowsForms>true</UseWindowsForms>
     <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
     <Nullable>enable</Nullable>
-    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="MonoGame.Framework.WindowsDX" Version="3.8.*" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Program.cs" />
-    <Compile Include="Screens\DesktopUiChrome.cs" />
-    <Compile Include="StateManagement\ScreenState.cs" />
-    <Compile Include="PuzzleGame.cs" />
-    <Compile Include="Gameplay\PuzzleBoard.cs" />
-    <Compile Include="Persistence\GameplayPersistence.cs" />
-    <Compile Include="StateManagement\GameScreen.cs" />
-    <Compile Include="StateManagement\InputState.cs" />
-    <Compile Include="StateManagement\ScreenManager.cs" />
-    <Compile Include="Screens\PlayerIndexEventArgs.cs" />
-    <Compile Include="Screens\TextLayout.cs" />
-    <Compile Include="Screens\MenuEntry.cs" />
-    <Compile Include="Screens\MenuScreen.cs" />
-    <Compile Include="Screens\MainMenuScreen.cs" />
-    <Compile Include="Screens\BackgroundScreen.cs" />
-    <Compile Include="Screens\GameplayScreen.cs" />
-    <Compile Include="Screens\PreviewScreen.cs" />
-    <Compile Include="Screens\InGameOptionsScreen.cs" />
-    <Compile Include="Screens\WinScreen.cs" />
-    <Compile Include="Screens\LoadingScreen.cs" />
-    <Compile Include="Screens\MessageBoxScreen.cs" />
-    <Compile Include="Screens\CreditsScreen.cs" />
+    <PackageReference Include="MonoGame.Framework.WindowsDX" Version="3.8.*"/>
   </ItemGroup>
   <Target Name="RestoreMonoGameTools"
           Condition="'$(DesignTimeBuild)' != 'true'"
           BeforeTargets="Restore"
           Inputs="$(MSBuildProjectDirectory)\.config\dotnet-tools.json"
           Outputs="$(MSBuildProjectDirectory)\Content\obj\dotnet-tools-restored.stamp">
-    <MakeDir Directories="$(MSBuildProjectDirectory)\Content\obj" />
+    <MakeDir Directories="$(MSBuildProjectDirectory)\Content\obj"/>
     <Exec WorkingDirectory="$(MSBuildProjectDirectory)"
           Command="dotnet tool restore"
-          StandardOutputImportance="Low" />
-    <Touch Files="$(MSBuildProjectDirectory)\Content\obj\dotnet-tools-restored.stamp" AlwaysCreate="true" />
+          StandardOutputImportance="Low"/>
+    <Touch Files="$(MSBuildProjectDirectory)\Content\obj\dotnet-tools-restored.stamp" AlwaysCreate="true"/>
   </Target>
   <Target Name="BuildMonoGameContent"
           Condition="'$(DesignTimeBuild)' != 'true'"
           DependsOnTargets="RestoreMonoGameTools"
           BeforeTargets="CopyFilesToOutputDirectory">
-    <RemoveDir Directories="$(MSBuildProjectDirectory)\Content\bin\Windows" />
-    <RemoveDir Directories="$(MSBuildProjectDirectory)\Content\obj\Windows" />
+    <RemoveDir Directories="$(MSBuildProjectDirectory)\Content\bin\Windows"/>
+    <RemoveDir Directories="$(MSBuildProjectDirectory)\Content\obj\Windows"/>
     <Exec WorkingDirectory="$(MSBuildProjectDirectory)\Content"
           Command="dotnet mgcb /@:Content.mgcb /rebuild /quiet"
-          StandardOutputImportance="Low" />
+          StandardOutputImportance="Low"/>
   </Target>
   <Target Name="CopyMonoGameContent"
           Condition="'$(DesignTimeBuild)' != 'true'"
           DependsOnTargets="BuildMonoGameContent"
           BeforeTargets="CopyFilesToOutputDirectory">
-    <RemoveDir Directories="$(OutDir)Content" />
+    <RemoveDir Directories="$(OutDir)Content"/>
     <ItemGroup>
-      <_MonoGameBuiltContent Include="$(MSBuildProjectDirectory)\Content\bin\Windows\**\*" />
+      <_MonoGameBuiltContent Include="$(MSBuildProjectDirectory)\Content\bin\Windows\**\*"/>
     </ItemGroup>
     <Copy SourceFiles="@(_MonoGameBuiltContent)"
           DestinationFiles="@(_MonoGameBuiltContent->'$(OutDir)Content\%(RecursiveDir)%(Filename)%(Extension)')"
-          SkipUnchangedFiles="true" />
+          SkipUnchangedFiles="true"/>
   </Target>
   <Target Name="CleanMonoGameContent" AfterTargets="CoreClean">
-    <RemoveDir Directories="$(MSBuildProjectDirectory)\Content\bin" />
-    <RemoveDir Directories="$(MSBuildProjectDirectory)\Content\obj" />
+    <RemoveDir Directories="$(MSBuildProjectDirectory)\Content\bin"/>
+    <RemoveDir Directories="$(MSBuildProjectDirectory)\Content\obj"/>
   </Target>
 </Project>
