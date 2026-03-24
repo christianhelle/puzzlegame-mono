@@ -48,16 +48,22 @@ public sealed class InGameOptionsScreen : MenuScreen
 
     protected override void OnCancel(PlayerIndex playerIndex) => ResumeGame(playerIndex);
 
-    private void OnResumeGameSelected(object? sender, PlayerIndexEventArgs e) => ResumeGame(e.PlayerIndex);
+    private void OnResumeGameSelected(object? sender, PlayerIndexEventArgs e)
+        => ResumeGame(e.PlayerIndex);
 
     private void OnQuitGameSelected(object? sender, PlayerIndexEventArgs e)
     {
-        LoadingScreen.Load(ScreenManager, true, e.PlayerIndex, new BackgroundScreen(), new MainMenuScreen(() => new GameplayScreen()));
+        LoadingScreen.Load(
+            ScreenManager,
+            loadingIsSlow: true,
+            e.PlayerIndex,
+            new BackgroundScreen(),
+            new MainMenuScreen(() => new GameplayScreen()));
     }
 
     private void ResumeGame(PlayerIndex playerIndex)
     {
         gameplayScreen.PrepareToResumeFromPause();
-        LoadingScreen.Load(ScreenManager, false, playerIndex, gameplayScreen);
+        LoadingScreen.Load(ScreenManager, loadingIsSlow: false, playerIndex, gameplayScreen);
     }
 }

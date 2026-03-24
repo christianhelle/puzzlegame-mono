@@ -7,8 +7,8 @@ namespace PuzzleGame.Screens;
 
 public sealed class WinScreen : GameScreen
 {
-    private readonly TimeSpan playingTime;
     private readonly int moveCount;
+    private readonly TimeSpan playingTime;
     private SpriteFont? congratulationsFont;
     private SpriteFont? statsFont;
 
@@ -74,56 +74,117 @@ public sealed class WinScreen : GameScreen
         var titlePosition = new Vector2(dialogBounds.Center.X, dialogBounds.Y + 72f);
         var summary = $"Time  {playingTime:mm\\:ss}\\nMoves {moveCount}";
         var summarySize = font.MeasureString(summary);
-        var summaryPosition = new Vector2(dialogBounds.Center.X - (summarySize.X / 2f), dialogBounds.Y + 178f);
+        var summaryPosition = new Vector2(
+            dialogBounds.Center.X - summarySize.X / 2f,
+            dialogBounds.Y + 178f);
         var prompt = "Play again or return to the main menu.";
         var promptSize = font.MeasureString(prompt);
-        var promptPosition = new Vector2(dialogBounds.Center.X - (promptSize.X / 2f), dialogBounds.Bottom - 122f);
+        var promptPosition = new Vector2(
+            dialogBounds.Center.X - promptSize.X / 2f,
+            dialogBounds.Bottom - 122f);
 
         ScreenManager.FadeBackBufferToBlack(0.48f * TransitionAlpha);
 
         spriteBatch.Begin();
-        spriteBatch.Draw(ScreenManager.GradientTexture, dialogBounds, Color.White * (0.92f * TransitionAlpha));
-        spriteBatch.Draw(ScreenManager.BlankTexture, dialogBounds, new Color(12, 17, 28) * (0.82f * TransitionAlpha));
-        DrawBorder(spriteBatch, dialogBounds, new Color(195, 206, 226) * TransitionAlpha);
-        spriteBatch.DrawString(titleFont, title, titlePosition + new Vector2(4f, 4f), Color.Black * (TransitionAlpha * 0.55f), 0f, titleOrigin, 1f, SpriteEffects.None, 0f);
-        spriteBatch.DrawString(titleFont, title, titlePosition, new Color(255, 237, 178) * TransitionAlpha, 0f, titleOrigin, 1f, SpriteEffects.None, 0f);
-        spriteBatch.DrawString(font, summary, summaryPosition + new Vector2(2f, 2f), Color.Black * (TransitionAlpha * 0.5f));
+        spriteBatch.Draw(
+            ScreenManager.GradientTexture,
+            dialogBounds,
+            Color.White * (0.92f * TransitionAlpha));
+        spriteBatch.Draw(
+            ScreenManager.BlankTexture,
+            dialogBounds,
+            new Color(r: 12, g: 17, b: 28) * (0.82f * TransitionAlpha));
+        DrawBorder(spriteBatch, dialogBounds, new Color(r: 195, g: 206, b: 226) * TransitionAlpha);
+        spriteBatch.DrawString(
+            titleFont,
+            title,
+            titlePosition + new Vector2(x: 4f, y: 4f),
+            Color.Black * (TransitionAlpha * 0.55f),
+            rotation: 0f,
+            titleOrigin,
+            scale: 1f,
+            SpriteEffects.None,
+            layerDepth: 0f);
+        spriteBatch.DrawString(
+            titleFont,
+            title,
+            titlePosition,
+            new Color(r: 255, g: 237, b: 178) * TransitionAlpha,
+            rotation: 0f,
+            titleOrigin,
+            scale: 1f,
+            SpriteEffects.None,
+            layerDepth: 0f);
+        spriteBatch.DrawString(
+            font,
+            summary,
+            summaryPosition + new Vector2(x: 2f, y: 2f),
+            Color.Black * (TransitionAlpha * 0.5f));
         spriteBatch.DrawString(font, summary, summaryPosition, Color.White * TransitionAlpha);
-        spriteBatch.DrawString(font, prompt, promptPosition + new Vector2(2f, 2f), Color.Black * (TransitionAlpha * 0.5f));
-        spriteBatch.DrawString(font, prompt, promptPosition, new Color(220, 228, 240) * TransitionAlpha);
-        DrawButton(spriteBatch, ScreenManager.Font, "Play Again", playAgainBounds, playAgainBounds.Contains(input.MousePosition));
-        DrawButton(spriteBatch, ScreenManager.Font, "Main Menu", mainMenuBounds, mainMenuBounds.Contains(input.MousePosition));
+        spriteBatch.DrawString(
+            font,
+            prompt,
+            promptPosition + new Vector2(x: 2f, y: 2f),
+            Color.Black * (TransitionAlpha * 0.5f));
+        spriteBatch.DrawString(
+            font,
+            prompt,
+            promptPosition,
+            new Color(r: 220, g: 228, b: 240) * TransitionAlpha);
+        DrawButton(
+            spriteBatch,
+            ScreenManager.Font,
+            "Play Again",
+            playAgainBounds,
+            playAgainBounds.Contains(input.MousePosition));
+        DrawButton(
+            spriteBatch,
+            ScreenManager.Font,
+            "Main Menu",
+            mainMenuBounds,
+            mainMenuBounds.Contains(input.MousePosition));
         spriteBatch.End();
     }
 
     private void OnAccept(PlayerIndex playerIndex)
     {
-        Accepted?.Invoke(this, new PlayerIndexEventArgs(playerIndex));
+        Accepted?.Invoke(this, new(playerIndex));
         ExitScreen();
     }
 
     private void OnCancel(PlayerIndex playerIndex)
     {
-        Cancelled?.Invoke(this, new PlayerIndexEventArgs(playerIndex));
+        Cancelled?.Invoke(this, new(playerIndex));
         ExitScreen();
     }
 
-    private (Rectangle DialogBounds, Rectangle PlayAgainBounds, Rectangle MainMenuBounds) GetLayout()
+    private (Rectangle DialogBounds, Rectangle PlayAgainBounds, Rectangle MainMenuBounds)
+        GetLayout()
     {
-        var safeArea = ScreenManager.GetSafeArea(0.18f, 0.18f);
-        var dialogWidth = Math.Min(safeArea.Width, 620);
-        var dialogHeight = Math.Min(safeArea.Height, 400);
+        var safeArea = ScreenManager.GetSafeArea(
+            horizontalMarginRatio: 0.18f,
+            verticalMarginRatio: 0.18f);
+        var dialogWidth = Math.Min(safeArea.Width, val2: 620);
+        var dialogHeight = Math.Min(safeArea.Height, val2: 400);
         var dialogBounds = new Rectangle(
-            safeArea.Center.X - (dialogWidth / 2),
-            safeArea.Center.Y - (dialogHeight / 2),
+            safeArea.Center.X - dialogWidth / 2,
+            safeArea.Center.Y - dialogHeight / 2,
             dialogWidth,
             dialogHeight);
 
         const int buttonWidth = 188;
         const int buttonHeight = 54;
         var buttonsY = dialogBounds.Bottom - buttonHeight - 30;
-        var playAgainBounds = new Rectangle(dialogBounds.Center.X - buttonWidth - 12, buttonsY, buttonWidth, buttonHeight);
-        var mainMenuBounds = new Rectangle(dialogBounds.Center.X + 12, buttonsY, buttonWidth, buttonHeight);
+        var playAgainBounds = new Rectangle(
+            dialogBounds.Center.X - buttonWidth - 12,
+            buttonsY,
+            buttonWidth,
+            buttonHeight);
+        var mainMenuBounds = new Rectangle(
+            dialogBounds.Center.X + 12,
+            buttonsY,
+            buttonWidth,
+            buttonHeight);
 
         return (dialogBounds, playAgainBounds, mainMenuBounds);
     }
@@ -132,21 +193,44 @@ public sealed class WinScreen : GameScreen
     {
         var texture = ScreenManager.BlankTexture;
         const int thickness = 2;
-        spriteBatch.Draw(texture, new Rectangle(bounds.Left, bounds.Top, bounds.Width, thickness), color);
-        spriteBatch.Draw(texture, new Rectangle(bounds.Left, bounds.Bottom - thickness, bounds.Width, thickness), color);
-        spriteBatch.Draw(texture, new Rectangle(bounds.Left, bounds.Top, thickness, bounds.Height), color);
-        spriteBatch.Draw(texture, new Rectangle(bounds.Right - thickness, bounds.Top, thickness, bounds.Height), color);
+        spriteBatch.Draw(
+            texture,
+            new Rectangle(bounds.Left, bounds.Top, bounds.Width, thickness),
+            color);
+        spriteBatch.Draw(
+            texture,
+            new Rectangle(bounds.Left, bounds.Bottom - thickness, bounds.Width, thickness),
+            color);
+        spriteBatch.Draw(
+            texture,
+            new Rectangle(bounds.Left, bounds.Top, thickness, bounds.Height),
+            color);
+        spriteBatch.Draw(
+            texture,
+            new Rectangle(bounds.Right - thickness, bounds.Top, thickness, bounds.Height),
+            color);
     }
 
-    private void DrawButton(SpriteBatch spriteBatch, SpriteFont font, string label, Rectangle bounds, bool hovered)
+    private void DrawButton(
+        SpriteBatch spriteBatch,
+        SpriteFont font,
+        string label,
+        Rectangle bounds,
+        bool hovered)
     {
-        var backgroundColor = hovered ? new Color(93, 133, 196) : new Color(48, 65, 96);
+        var backgroundColor = hovered ? new(r: 93, g: 133, b: 196) : new Color(r: 48, g: 65, b: 96);
         var labelSize = font.MeasureString(label);
-        var labelPosition = new Vector2(bounds.Center.X - (labelSize.X / 2f), bounds.Center.Y - (labelSize.Y / 2f));
+        var labelPosition = new Vector2(
+            bounds.Center.X - labelSize.X / 2f,
+            bounds.Center.Y - labelSize.Y / 2f);
 
         spriteBatch.Draw(ScreenManager.BlankTexture, bounds, backgroundColor * TransitionAlpha);
-        DrawBorder(spriteBatch, bounds, new Color(191, 206, 230) * TransitionAlpha);
-        spriteBatch.DrawString(font, label, labelPosition + new Vector2(2f, 2f), Color.Black * (TransitionAlpha * 0.5f));
+        DrawBorder(spriteBatch, bounds, new Color(r: 191, g: 206, b: 230) * TransitionAlpha);
+        spriteBatch.DrawString(
+            font,
+            label,
+            labelPosition + new Vector2(x: 2f, y: 2f),
+            Color.Black * (TransitionAlpha * 0.5f));
         spriteBatch.DrawString(font, label, labelPosition, Color.White * TransitionAlpha);
     }
 }

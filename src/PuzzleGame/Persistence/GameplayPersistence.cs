@@ -46,7 +46,11 @@ internal sealed class GameplayPersistence
 
         try
         {
-            using var stream = File.Open(saveFilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+            using var stream = File.Open(
+                saveFilePath,
+                FileMode.Open,
+                FileAccess.Read,
+                FileShare.Read);
             ValidateSaveFileHeader(stream);
 
             var gameplayScreen = GameplayScreen.CreateForLoad();
@@ -65,7 +69,9 @@ internal sealed class GameplayPersistence
     {
         ArgumentNullException.ThrowIfNull(screenManager);
 
-        if (string.IsNullOrWhiteSpace(saveDirectoryPath) || string.IsNullOrWhiteSpace(saveFilePath) || string.IsNullOrWhiteSpace(temporarySaveFilePath))
+        if (string.IsNullOrWhiteSpace(saveDirectoryPath) || string.IsNullOrWhiteSpace(saveFilePath)
+                                                         || string.IsNullOrWhiteSpace(
+                                                                temporarySaveFilePath))
         {
             return;
         }
@@ -81,7 +87,11 @@ internal sealed class GameplayPersistence
         {
             Directory.CreateDirectory(saveDirectoryPath);
 
-            using (var stream = File.Open(temporarySaveFilePath, FileMode.Create, FileAccess.Write, FileShare.None))
+            using (var stream = File.Open(
+                temporarySaveFilePath,
+                FileMode.Create,
+                FileAccess.Write,
+                FileShare.None))
             {
                 WriteSaveFileHeader(stream);
                 gameplayScreen.Serialize(stream);
@@ -98,7 +108,8 @@ internal sealed class GameplayPersistence
 
     private void RestorePendingSaveIfNeeded()
     {
-        if (string.IsNullOrWhiteSpace(saveFilePath) || string.IsNullOrWhiteSpace(temporarySaveFilePath))
+        if (string.IsNullOrWhiteSpace(saveFilePath)
+         || string.IsNullOrWhiteSpace(temporarySaveFilePath))
         {
             return;
         }
@@ -122,7 +133,8 @@ internal sealed class GameplayPersistence
         }
         catch (Exception exception) when (IsPersistenceException(exception))
         {
-            Debug.WriteLine($"Failed to reconcile gameplay save files in '{saveDirectoryPath}'. {exception}");
+            Debug.WriteLine(
+                $"Failed to reconcile gameplay save files in '{saveDirectoryPath}'. {exception}");
         }
     }
 
@@ -132,7 +144,7 @@ internal sealed class GameplayPersistence
         for (var index = screens.Length - 1; index >= 0; index--)
         {
             if (screens[index] is InGameOptionsScreen optionsScreen
-                && optionsScreen.TryGetGameplayScreenForPersistence(out var pausedGameplayScreen))
+             && optionsScreen.TryGetGameplayScreenForPersistence(out var pausedGameplayScreen))
             {
                 return pausedGameplayScreen;
             }
@@ -198,22 +210,22 @@ internal sealed class GameplayPersistence
 
     private static string? GetApplicationDataPath()
     {
-        var localApplicationData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+        var localApplicationData =
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
         if (!string.IsNullOrWhiteSpace(localApplicationData))
         {
             return localApplicationData;
         }
 
-        var roamingApplicationData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+        var roamingApplicationData =
+            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
         return string.IsNullOrWhiteSpace(roamingApplicationData) ? null : roamingApplicationData;
     }
 
     private static bool IsPersistenceException(Exception exception)
-    {
-        return exception is IOException
+        => exception is IOException
             or UnauthorizedAccessException
             or InvalidDataException
             or NotSupportedException
             or ArgumentException;
-    }
 }

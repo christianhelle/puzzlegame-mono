@@ -19,7 +19,8 @@ public sealed class PreviewScreen : GameScreen
         TransitionOffTime = TimeSpan.Zero;
     }
 
-    public override void LoadContent() => previewTexture ??= ScreenManager.Game.Content.Load<Texture2D>(puzzleImageAssetName);
+    public override void LoadContent() => previewTexture ??=
+        ScreenManager.Game.Content.Load<Texture2D>(puzzleImageAssetName);
 
     public override void Draw(GameTime gameTime)
     {

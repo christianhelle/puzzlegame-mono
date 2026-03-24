@@ -6,7 +6,6 @@ namespace PuzzleGame.Gameplay;
 internal sealed class PuzzleBoard
 {
     private readonly int[] tiles;
-    private int blankIndex;
 
     public PuzzleBoard(int size = 4)
     {
@@ -22,7 +21,7 @@ internal sealed class PuzzleBoard
 
     public int Size { get; }
 
-    public int BlankIndex => blankIndex;
+    public int BlankIndex { get; private set; }
 
     public bool IsSolved
     {
@@ -48,7 +47,7 @@ internal sealed class PuzzleBoard
         }
 
         tiles[^1] = 0;
-        blankIndex = tiles.Length - 1;
+        BlankIndex = tiles.Length - 1;
     }
 
     public void Shuffle(int moveCount, Random random)
@@ -59,24 +58,24 @@ internal sealed class PuzzleBoard
 
         for (var move = 0; move < moveCount; move++)
         {
-            var neighbors = GetNeighborIndexes(blankIndex);
+            var neighbors = GetNeighborIndexes(BlankIndex);
             if (previousBlankIndex >= 0 && neighbors.Count > 1)
             {
                 neighbors.Remove(previousBlankIndex);
             }
 
             var nextBlankIndex = neighbors[random.Next(neighbors.Count)];
-            previousBlankIndex = blankIndex;
-            Swap(blankIndex, nextBlankIndex);
-            blankIndex = nextBlankIndex;
+            previousBlankIndex = BlankIndex;
+            Swap(BlankIndex, nextBlankIndex);
+            BlankIndex = nextBlankIndex;
         }
 
         if (IsSolved)
         {
-            var neighbors = GetNeighborIndexes(blankIndex);
+            var neighbors = GetNeighborIndexes(BlankIndex);
             var nextBlankIndex = neighbors[0];
-            Swap(blankIndex, nextBlankIndex);
-            blankIndex = nextBlankIndex;
+            Swap(BlankIndex, nextBlankIndex);
+            BlankIndex = nextBlankIndex;
         }
     }
 
@@ -84,8 +83,8 @@ internal sealed class PuzzleBoard
 
     public bool TryMoveBlankByOffset(int xOffset, int yOffset)
     {
-        var blankRow = blankIndex / Size;
-        var blankColumn = blankIndex % Size;
+        var blankRow = BlankIndex / Size;
+        var blankColumn = BlankIndex % Size;
         var targetRow = blankRow + yOffset;
         var targetColumn = blankColumn + xOffset;
 
@@ -94,21 +93,21 @@ internal sealed class PuzzleBoard
             return false;
         }
 
-        var targetIndex = (targetRow * Size) + targetColumn;
-        Swap(blankIndex, targetIndex);
-        blankIndex = targetIndex;
+        var targetIndex = targetRow * Size + targetColumn;
+        Swap(BlankIndex, targetIndex);
+        BlankIndex = targetIndex;
         return true;
     }
 
     public bool TryMovePosition(int positionIndex)
     {
-        if (positionIndex < 0 || positionIndex >= tiles.Length || positionIndex == blankIndex)
+        if (positionIndex < 0 || positionIndex >= tiles.Length || positionIndex == BlankIndex)
         {
             return false;
         }
 
-        var blankRow = blankIndex / Size;
-        var blankColumn = blankIndex % Size;
+        var blankRow = BlankIndex / Size;
+        var blankColumn = BlankIndex % Size;
         var tileRow = positionIndex / Size;
         var tileColumn = positionIndex % Size;
 
@@ -117,8 +116,8 @@ internal sealed class PuzzleBoard
             return false;
         }
 
-        Swap(blankIndex, positionIndex);
-        blankIndex = positionIndex;
+        Swap(BlankIndex, positionIndex);
+        BlankIndex = positionIndex;
         return true;
     }
 
@@ -130,7 +129,9 @@ internal sealed class PuzzleBoard
 
         if (tileState.Length != tiles.Length)
         {
-            throw new ArgumentException("Tile state length does not match the puzzle board.", nameof(tileState));
+            throw new ArgumentException(
+                "Tile state length does not match the puzzle board.",
+                nameof(tileState));
         }
 
         var restoredTiles = new int[tileState.Length];
@@ -142,12 +143,16 @@ internal sealed class PuzzleBoard
             var tile = tileState[index];
             if (tile < 0 || tile >= tileState.Length)
             {
-                throw new ArgumentException("Tile state contains an out-of-range tile value.", nameof(tileState));
+                throw new ArgumentException(
+                    "Tile state contains an out-of-range tile value.",
+                    nameof(tileState));
             }
 
             if (seenTiles[tile])
             {
-                throw new ArgumentException("Tile state contains duplicate tile values.", nameof(tileState));
+                throw new ArgumentException(
+                    "Tile state contains duplicate tile values.",
+                    nameof(tileState));
             }
 
             seenTiles[tile] = true;
@@ -170,7 +175,7 @@ internal sealed class PuzzleBoard
         }
 
         Array.Copy(restoredTiles, tiles, tiles.Length);
-        blankIndex = restoredBlankIndex;
+        BlankIndex = restoredBlankIndex;
     }
 
     private List<int> GetNeighborIndexes(int index)
@@ -238,7 +243,7 @@ internal sealed class PuzzleBoard
             return inversionCount % 2 == 0;
         }
 
-        var blankRowFromBottom = Size - (blankTileIndex / Size);
+        var blankRowFromBottom = Size - blankTileIndex / Size;
         if (blankRowFromBottom % 2 == 0)
         {
             return inversionCount % 2 != 0;

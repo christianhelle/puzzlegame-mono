@@ -12,7 +12,8 @@ internal static class TextLayout
         {
             return string.Empty;
         }
-        var normalizedText = text.Replace("\r\n", "\n", StringComparison.Ordinal).Replace('\r', '\n');
+        var normalizedText = text.Replace("\r\n", "\n", StringComparison.Ordinal)
+            .Replace(oldChar: '\r', newChar: '\n');
         var paragraphs = normalizedText.Split('\n');
         var builder = new StringBuilder();
         var spaceWidth = font.MeasureString(" ").X;
@@ -28,7 +29,9 @@ internal static class TextLayout
                 continue;
             }
             var lineWidth = 0f;
-            foreach (var word in paragraph.Split(' ', StringSplitOptions.RemoveEmptyEntries))
+            foreach (var word in paragraph.Split(
+                separator: ' ',
+                StringSplitOptions.RemoveEmptyEntries))
             {
                 var wordWidth = font.MeasureString(word).X;
                 if (lineWidth > 0f && lineWidth + spaceWidth + wordWidth > maxLineWidth)

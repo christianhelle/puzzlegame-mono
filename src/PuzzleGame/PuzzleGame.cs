@@ -11,16 +11,15 @@ public sealed class PuzzleGame : Game
     private const int DefaultBackBufferWidth = 1200;
     private const int DefaultBackBufferHeight = 720;
 
-    private readonly GraphicsDeviceManager graphics;
     private readonly GameplayPersistence gameplayPersistence;
     private readonly ScreenManager screenManager;
 
     public PuzzleGame()
     {
         Content.RootDirectory = "Content";
-        gameplayPersistence = new GameplayPersistence();
+        gameplayPersistence = new();
 
-        graphics = new GraphicsDeviceManager(this)
+        _ = new GraphicsDeviceManager(this)
         {
             PreferredBackBufferWidth = DefaultBackBufferWidth,
             PreferredBackBufferHeight = DefaultBackBufferHeight,
@@ -32,7 +31,7 @@ public sealed class PuzzleGame : Game
         Window.AllowUserResizing = true;
         Window.Title = "Chris' Puzzle Game";
 
-        screenManager = new ScreenManager(this);
+        screenManager = new(this);
         Components.Add(screenManager);
         Exiting += HandleGameExiting;
 
@@ -41,16 +40,18 @@ public sealed class PuzzleGame : Game
 
     private void ConfigureStartupScreens()
     {
-        screenManager.AddScreen(new BackgroundScreen(), null);
+        screenManager.AddScreen(new BackgroundScreen(), controllingPlayer: null);
 
         var savedGameplay = gameplayPersistence.TryLoad();
         if (savedGameplay is not null)
         {
-            screenManager.AddScreen(savedGameplay, null);
+            screenManager.AddScreen(savedGameplay, controllingPlayer: null);
             return;
         }
 
-        screenManager.AddScreen(new MainMenuScreen(() => new GameplayScreen()), null);
+        screenManager.AddScreen(
+            new MainMenuScreen(() => new GameplayScreen()),
+            controllingPlayer: null);
     }
 
     private void HandleGameExiting(object? sender, EventArgs e)
