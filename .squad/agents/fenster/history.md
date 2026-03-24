@@ -15,3 +15,4 @@
 - Day 1: The original Menu and Congratulations spritefonts target Segoe UI Mono and Kootenay, but the Windows build machine does not have those fonts installed, so the port uses Consolas and Georgia fallbacks to keep `dotnet build` dependable.
 - Day 1: UI persistence now saves resumable gameplay to `%LocalAppData%\ChrisPuzzleGame\gameplay-state.bin`, stages writes through a sibling `.tmp` file, and falls back to the normal main-menu startup if the save is missing or corrupt.
 - Day 1: GitHub CI should stay explicit and Windows-only for now: restore the trusted UI project and build `src\ChrisPuzzleGame.UI` so hosted validation exercises the same MonoGame content pipeline path as local development.
+- Day 1: GitHub Pages deployment should stay in its own workflow, publish the checked-in `site/` directory with the official Pages actions, and leave the Windows CI build unchanged.
