@@ -11,3 +11,5 @@
 - Day 1: This repo is a MonoGame port of Chris' Puzzle Game, with the original XNA Windows Phone 7 codebase used as the behavior reference.
 - Day 1: Christian prefers frequent small logical commits during implementation so progress is easy to review and trace.
 - Day 1: Hockney owns player-facing screens, input affordances, and desktop-friendly UI polish.
+- Day 1: The desktop shell now treats mouse wheel, Tab, and right-click as first-class menu affordances so keyboard and pointer navigation feel native on Windows.
+- Day 1: When no background texture is available, the UI shell uses a procedural puzzle-board backdrop so menus still read as intentional rather than placeholder.

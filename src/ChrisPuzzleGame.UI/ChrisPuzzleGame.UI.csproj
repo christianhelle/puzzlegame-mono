@@ -27,14 +27,48 @@
     <Compile Include="Screens\MainMenuScreen.cs" />
     <Compile Include="Screens\BackgroundScreen.cs" />
     <Compile Include="Screens\GameplayScreen.cs" />
+    <Compile Include="Screens\PreviewScreen.cs" />
+    <Compile Include="Screens\InGameOptionsScreen.cs" />
+    <Compile Include="Screens\WinScreen.cs" />
     <Compile Include="Screens\LoadingScreen.cs" />
     <Compile Include="Screens\MessageBoxScreen.cs" />
     <Compile Include="Screens\CreditsScreen.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Content Include="Content\bin\Windows\Content\**\*">
-      <Link>Content\%(RecursiveDir)%(Filename)%(Extension)</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
+  <Target Name="RestoreMonoGameTools"
+          Condition="'$(DesignTimeBuild)' != 'true'"
+          BeforeTargets="Restore"
+          Inputs="$(MSBuildProjectDirectory)\.config\dotnet-tools.json"
+          Outputs="$(MSBuildProjectDirectory)\Content\obj\dotnet-tools-restored.stamp">
+    <MakeDir Directories="$(MSBuildProjectDirectory)\Content\obj" />
+    <Exec WorkingDirectory="$(MSBuildProjectDirectory)"
+          Command="dotnet tool restore"
+          StandardOutputImportance="Low" />
+    <Touch Files="$(MSBuildProjectDirectory)\Content\obj\dotnet-tools-restored.stamp" AlwaysCreate="true" />
+  </Target>
+  <Target Name="BuildMonoGameContent"
+          Condition="'$(DesignTimeBuild)' != 'true'"
+          DependsOnTargets="RestoreMonoGameTools"
+          BeforeTargets="CopyFilesToOutputDirectory">
+    <RemoveDir Directories="$(MSBuildProjectDirectory)\Content\bin\Windows" />
+    <RemoveDir Directories="$(MSBuildProjectDirectory)\Content\obj\Windows" />
+    <Exec WorkingDirectory="$(MSBuildProjectDirectory)\Content"
+          Command="dotnet mgcb /@:Content.mgcb /rebuild /quiet"
+          StandardOutputImportance="Low" />
+  </Target>
+  <Target Name="CopyMonoGameContent"
+          Condition="'$(DesignTimeBuild)' != 'true'"
+          DependsOnTargets="BuildMonoGameContent"
+          BeforeTargets="CopyFilesToOutputDirectory">
+    <RemoveDir Directories="$(OutDir)Content" />
+    <ItemGroup>
+      <_MonoGameBuiltContent Include="$(MSBuildProjectDirectory)\Content\bin\Windows\**\*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(_MonoGameBuiltContent)"
+          DestinationFiles="@(_MonoGameBuiltContent->'$(OutDir)Content\%(RecursiveDir)%(Filename)%(Extension)')"
+          SkipUnchangedFiles="true" />
+  </Target>
+  <Target Name="CleanMonoGameContent" AfterTargets="CoreClean">
+    <RemoveDir Directories="$(MSBuildProjectDirectory)\Content\bin" />
+    <RemoveDir Directories="$(MSBuildProjectDirectory)\Content\obj" />
+  </Target>
 </Project>

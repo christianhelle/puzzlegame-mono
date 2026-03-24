@@ -7,6 +7,7 @@ namespace ChrisPuzzleGame.Screens;
 public sealed class MainMenuScreen : MenuScreen
 {
     private readonly Func<GameScreen>? createGameplayScreen;
+    protected override string FooterText => "Arrow keys, mouse wheel, or Tab to move | Enter or click to choose | Esc or right-click to exit";
     public MainMenuScreen(Func<GameScreen>? createGameplayScreen = null) : base("Chris' Puzzle Game")
     {
         this.createGameplayScreen = createGameplayScreen;

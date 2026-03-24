@@ -15,4 +15,74 @@
 #begin Menu.spritefont
 /importer:FontDescriptionImporter
 /processor:FontDescriptionProcessor
-/build:Menu.spritefont
+/build:Menu.spritefont;Menu
+
+#begin GameTime.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/build:GameTime.spritefont;GameTime
+
+#begin Congratulations.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/build:Congratulations.spritefont;Congratulations
+
+#begin background.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/build:background.png;background
+
+#begin blank.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/build:blank.png;blank
+
+#begin gradient.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/build:gradient.png;gradient
+
+#begin Penguins.jpg
+/importer:TextureImporter
+/processor:TextureProcessor
+/build:Penguins.jpg;Penguins
+
+#begin Puzzles/Chrysanthemum.jpg
+/importer:TextureImporter
+/processor:TextureProcessor
+/build:Puzzles/Chrysanthemum.jpg;Puzzles/Chrysanthemum
+
+#begin Puzzles/Desert.jpg
+/importer:TextureImporter
+/processor:TextureProcessor
+/build:Puzzles/Desert.jpg;Puzzles/Desert
+
+#begin Puzzles/Hydrangeas.jpg
+/importer:TextureImporter
+/processor:TextureProcessor
+/build:Puzzles/Hydrangeas.jpg;Puzzles/Hydrangeas
+
+#begin Puzzles/Jellyfish.jpg
+/importer:TextureImporter
+/processor:TextureProcessor
+/build:Puzzles/Jellyfish.jpg;Puzzles/Jellyfish
+
+#begin Puzzles/Koala.jpg
+/importer:TextureImporter
+/processor:TextureProcessor
+/build:Puzzles/Koala.jpg;Puzzles/Koala
+
+#begin Puzzles/Lighthouse.jpg
+/importer:TextureImporter
+/processor:TextureProcessor
+/build:Puzzles/Lighthouse.jpg;Puzzles/Lighthouse
+
+#begin Puzzles/Penguins.jpg
+/importer:TextureImporter
+/processor:TextureProcessor
+/build:Puzzles/Penguins.jpg;Puzzles/Penguins
+
+#begin Puzzles/Tulips.jpg
+/importer:TextureImporter
+/processor:TextureProcessor
+/build:Puzzles/Tulips.jpg;Puzzles/Tulips

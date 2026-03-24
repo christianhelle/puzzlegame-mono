@@ -6,3 +6,7 @@
 .squad/.first-run
 # Squad: SubSquad activation file (local to this machine)
 .squad-workstream
+
+# Build outputs
+[Bb]in/
+[Oo]bj/

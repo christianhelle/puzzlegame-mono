@@ -1,4 +1,7 @@
 using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Text;
 using ChrisPuzzleGame.Gameplay;
 using ChrisPuzzleGame.StateManagement;
 using Microsoft.Xna.Framework;
@@ -10,83 +13,166 @@ namespace ChrisPuzzleGame.Screens;
 public sealed class GameplayScreen : GameScreen
 {
     private const int ShuffleMoves = 240;
+    private const double CommandIntervalMilliseconds = 10d;
+    private const int SaveDataVersion = 2;
+
+    private static readonly Random PuzzleRandom = new();
+    private static readonly string[] PuzzleImages =
+    [
+        "Chrysanthemum",
+        "Desert",
+        "Hydrangeas",
+        "Jellyfish",
+        "Koala",
+        "Lighthouse",
+        "Penguins",
+        "Tulips",
+    ];
+
+    private static int lastUsedPuzzleIndex = -1;
 
     private readonly Random random = new();
+    private readonly Queue<Keys> pendingCommands = [];
     private readonly PuzzleBoard board = new();
 
-    private bool hasStarted;
-    private bool solvedPopupShown;
+    private Texture2D? puzzleTexture;
+    private SpriteFont? gameTimerFont;
+    private TimeSpan playingTime;
+    private double commandTimer;
     private int moveCount;
-    private TimeSpan elapsedTime;
-    private TimeSpan startedAt;
+    private bool boardInitialized;
+    private bool restoreFlowPending;
+    private bool winFlowShown;
+    private SessionFlow sessionFlow = SessionFlow.Active;
 
-    public GameplayScreen()
+    private GameplayScreen(bool selectPuzzleImage)
     {
-        TransitionOnTime = TimeSpan.FromSeconds(0.2);
-        TransitionOffTime = TimeSpan.FromSeconds(0.2);
+        CurrentPuzzleImage = selectPuzzleImage ? SelectPuzzleImage() : string.Empty;
+        TransitionOnTime = TimeSpan.Zero;
+        TransitionOffTime = TimeSpan.Zero;
     }
+
+    public GameplayScreen() : this(selectPuzzleImage: true) { }
+
+    public string CurrentPuzzleImage { get; private set; }
+
+    internal bool CanResume => boardInitialized;
+
+    internal static GameplayScreen CreateForLoad() => new(selectPuzzleImage: false);
 
     public override void LoadContent()
     {
-        ResetBoard();
+        if (string.IsNullOrWhiteSpace(CurrentPuzzleImage))
+        {
+            throw new InvalidOperationException("Gameplay screen cannot load without a puzzle image.");
+        }
+
+        puzzleTexture = ScreenManager.Game.Content.Load<Texture2D>(CurrentPuzzleImage);
+        gameTimerFont = ScreenManager.Game.Content.Load<SpriteFont>("GameTime");
+
+        if (!boardInitialized)
+        {
+            ScrambleBoard();
+            boardInitialized = true;
+        }
+    }
+
+    public override void UnloadContent()
+    {
+        puzzleTexture = null;
+        gameTimerFont = null;
     }
 
     public override void Update(GameTime gameTime, bool otherScreenHasFocus, bool coveredByOtherScreen)
     {
         base.Update(gameTime, otherScreenHasFocus, coveredByOtherScreen);
 
-        if (!IsActive || solvedPopupShown)
+        if (!IsActive || winFlowShown)
         {
             return;
         }
 
-        if (!hasStarted)
+        if (restoreFlowPending)
         {
-            startedAt = gameTime.TotalGameTime;
-            hasStarted = true;
+            restoreFlowPending = false;
+
+            switch (sessionFlow)
+            {
+                case SessionFlow.Options:
+                    ShowOptions(ControllingPlayer ?? PlayerIndex.One);
+                    return;
+                case SessionFlow.Win:
+                    ShowWinScreen(ControllingPlayer ?? PlayerIndex.One);
+                    return;
+            }
         }
 
-        elapsedTime = gameTime.TotalGameTime - startedAt;
+        playingTime += gameTime.ElapsedGameTime;
+
+        if (IsShowingLivePreview())
+        {
+            return;
+        }
+
+        QueueHeldCommand(GetHeldMovementCommand());
+        commandTimer += gameTime.ElapsedGameTime.TotalMilliseconds;
+
+        while (commandTimer >= CommandIntervalMilliseconds)
+        {
+            commandTimer -= CommandIntervalMilliseconds;
+
+            if (pendingCommands.Count == 0)
+            {
+                break;
+            }
+
+            if (!TryMove(pendingCommands.Dequeue()))
+            {
+                continue;
+            }
+
+            moveCount++;
+
+            if (board.IsSolved)
+            {
+                ShowWinScreen(ControllingPlayer ?? PlayerIndex.One);
+                break;
+            }
+        }
     }
 
     public override void HandleInput(InputState input)
     {
+        if (winFlowShown)
+        {
+            return;
+        }
+
+        var playerIndex = ControllingPlayer ?? PlayerIndex.One;
+
         if (input.IsPauseGame(ControllingPlayer))
         {
-            ReturnToMainMenu(ControllingPlayer ?? PlayerIndex.One);
+            ShowOptions(playerIndex);
             return;
         }
 
-        if (input.IsNewKeyPress(Keys.R, ControllingPlayer, out _))
+        if (IsShowingLivePreview())
         {
-            ResetBoard();
             return;
         }
 
-        var moved = false;
-
-        if (input.IsNewKeyPress(Keys.Up, ControllingPlayer, out _ ) || input.IsNewKeyPress(Keys.W, ControllingPlayer, out _))
+        if (input.IsNewKeyPress(Keys.R, ControllingPlayer, out _) || input.IsNewKeyPress(Keys.F5, ControllingPlayer, out _))
         {
-            moved = board.TryMoveBlankByOffset(0, 1);
-        }
-        else if (input.IsNewKeyPress(Keys.Down, ControllingPlayer, out _ ) || input.IsNewKeyPress(Keys.S, ControllingPlayer, out _))
-        {
-            moved = board.TryMoveBlankByOffset(0, -1);
-        }
-        else if (input.IsNewKeyPress(Keys.Left, ControllingPlayer, out _ ) || input.IsNewKeyPress(Keys.A, ControllingPlayer, out _))
-        {
-            moved = board.TryMoveBlankByOffset(1, 0);
-        }
-        else if (input.IsNewKeyPress(Keys.Right, ControllingPlayer, out _ ) || input.IsNewKeyPress(Keys.D, ControllingPlayer, out _))
-        {
-            moved = board.TryMoveBlankByOffset(-1, 0);
-        }
-        else if (input.IsNewLeftClick(ControllingPlayer, out _))
-        {
-            moved = TryMoveFromMouse(input.MousePosition);
+            ScrambleBoard();
+            return;
         }
 
-        if (!moved)
+        if (!input.IsNewLeftClick(ControllingPlayer, out _))
+        {
+            return;
+        }
+
+        if (!TryMoveFromMouse(input.MousePosition))
         {
             return;
         }
@@ -95,161 +181,328 @@ public sealed class GameplayScreen : GameScreen
 
         if (board.IsSolved)
         {
-            ShowSolvedDialog(ControllingPlayer ?? PlayerIndex.One);
+            ShowWinScreen(playerIndex);
         }
     }
 
     public override void Draw(GameTime gameTime)
     {
+        ScreenManager.GraphicsDevice.Clear(Color.Black);
+
         var spriteBatch = ScreenManager.SpriteBatch;
-        var font = ScreenManager.Font;
-        var viewport = ScreenManager.GraphicsDevice.Viewport;
-        var boardBounds = GetBoardBounds(viewport);
-        var tileSize = boardBounds.Width / board.Size;
-        var accent = new Color(245, 214, 92);
-        var body = new Color(235, 240, 255);
+        var viewportBounds = ScreenManager.GraphicsDevice.Viewport.Bounds;
+        var isShowingPreview = IsShowingLivePreview();
 
         spriteBatch.Begin();
 
-        DrawPanel(spriteBatch, new Rectangle(40, 24, viewport.Width - 80, 104), new Color(9, 13, 22, 170), new Color(255, 255, 255, 40));
-        DrawShadowedString(spriteBatch, font, "Chris' Puzzle Game", new Vector2(64f, 38f), Color.White, 0.95f);
-        DrawShadowedString(spriteBatch, font, $"Moves {moveCount}", new Vector2(68f, 82f), body, 0.7f);
-        DrawShadowedString(spriteBatch, font, $"Time {elapsedTime:mm\\:ss}", new Vector2(250f, 82f), body, 0.7f);
-        DrawShadowedString(spriteBatch, font, "Arrow keys / WASD / click adjacent tile", new Vector2(430f, 82f), accent, 0.62f);
+        if (puzzleTexture is not null)
+        {
+            if (isShowingPreview)
+            {
+                spriteBatch.Draw(puzzleTexture, viewportBounds, Color.White);
+            }
+            else
+            {
+                DrawPuzzle(spriteBatch, viewportBounds);
+            }
+        }
 
-        DrawPanel(spriteBatch, boardBounds, new Color(7, 11, 18, 175), new Color(255, 255, 255, 36));
+        DrawHud(spriteBatch, viewportBounds, isShowingPreview);
+        spriteBatch.End();
+    }
+
+    internal void PrepareToResumeFromPause()
+    {
+        pendingCommands.Clear();
+        commandTimer = 0d;
+        restoreFlowPending = false;
+        sessionFlow = SessionFlow.Active;
+        winFlowShown = false;
+    }
+
+    private void ScrambleBoard()
+    {
+        board.Shuffle(ShuffleMoves, random);
+        pendingCommands.Clear();
+        moveCount = 0;
+        playingTime = TimeSpan.Zero;
+        commandTimer = 0d;
+        restoreFlowPending = false;
+        sessionFlow = SessionFlow.Active;
+        winFlowShown = false;
+    }
+
+    private void DrawPuzzle(SpriteBatch spriteBatch, Rectangle bounds)
+    {
+        if (puzzleTexture is null)
+        {
+            return;
+        }
 
         for (var index = 0; index < board.Size * board.Size; index++)
         {
-            var row = index / board.Size;
-            var column = index % board.Size;
-            var bounds = new Rectangle(
-                boardBounds.X + (column * tileSize) + 4,
-                boardBounds.Y + (row * tileSize) + 4,
-                tileSize - 8,
-                tileSize - 8);
-
             var tile = board.GetTileAt(index);
-
             if (tile == 0)
             {
-                spriteBatch.Draw(ScreenManager.BlankTexture, bounds, new Color(2, 4, 8, 200));
-                DrawFrame(spriteBatch, bounds, new Color(255, 255, 255, 26));
                 continue;
             }
 
-            var fill = GetTileColor(tile);
-            spriteBatch.Draw(ScreenManager.GradientTexture, bounds, fill);
-            spriteBatch.Draw(ScreenManager.BlankTexture, bounds, Color.Lerp(fill, Color.White, 0.12f));
-            DrawFrame(spriteBatch, bounds, new Color(255, 255, 255, 56));
+            var destinationRow = index / board.Size;
+            var destinationColumn = index % board.Size;
+            var sourceIndex = tile - 1;
+            var sourceRow = sourceIndex / board.Size;
+            var sourceColumn = sourceIndex % board.Size;
 
-            var label = tile.ToString();
-            var labelSize = font.MeasureString(label);
-            var labelPosition = new Vector2(bounds.Center.X, bounds.Center.Y);
-            spriteBatch.DrawString(font, label, labelPosition + new Vector2(2f, 2f), Color.Black * 0.45f, 0f, labelSize / 2f, 0.95f, SpriteEffects.None, 0f);
-            spriteBatch.DrawString(font, label, labelPosition, Color.White, 0f, labelSize / 2f, 0.95f, SpriteEffects.None, 0f);
-        }
+            var destinationBounds = GetCellBounds(bounds, destinationRow, destinationColumn, board.Size);
+            var sourceBounds = GetCellBounds(new Rectangle(0, 0, puzzleTexture.Width, puzzleTexture.Height), sourceRow, sourceColumn, board.Size);
 
-        DrawShadowedString(spriteBatch, font, "R reshuffles    Esc returns to menu", new Vector2(60f, viewport.Height - 46f), body, 0.6f);
-
-        spriteBatch.End();
-
-        if (TransitionPosition > 0f)
-        {
-            ScreenManager.FadeBackBufferToBlack(TransitionPosition * 0.35f);
+            spriteBatch.Draw(puzzleTexture, destinationBounds, sourceBounds, Color.White);
         }
     }
 
-    private void ResetBoard()
+    private void DrawHud(SpriteBatch spriteBatch, Rectangle viewportBounds, bool isShowingPreview)
     {
-        board.Shuffle(ShuffleMoves, random);
-        moveCount = 0;
-        elapsedTime = TimeSpan.Zero;
-        hasStarted = false;
-        solvedPopupShown = false;
+        var font = gameTimerFont ?? ScreenManager.Font;
+        var accent = new Color(244, 215, 111);
+        var body = new Color(236, 242, 252);
+
+        if (isShowingPreview)
+        {
+            const string prompt = "Release Enter or F1 to return to the puzzle";
+            var promptSize = ScreenManager.Font.MeasureString(prompt);
+            DrawShadowedString(
+                spriteBatch,
+                ScreenManager.Font,
+                prompt,
+                new Vector2(viewportBounds.Right - promptSize.X - 26f, viewportBounds.Bottom - 42f),
+                accent,
+                0.65f);
+            return;
+        }
+
+        DrawShadowedString(spriteBatch, font, $"Time {playingTime:mm\\:ss}", new Vector2(16f, 12f), body, 1f);
+        DrawShadowedString(spriteBatch, font, $"Moves {moveCount}", new Vector2(16f, 34f), body, 1f);
+        DrawShadowedString(spriteBatch, ScreenManager.Font, "Arrow keys / WASD move", new Vector2(16f, viewportBounds.Bottom - 70f), accent, 0.6f);
+        DrawShadowedString(spriteBatch, ScreenManager.Font, "Click an adjacent tile   R or F5 reshuffles   Esc opens options   Enter or F1 previews", new Vector2(16f, viewportBounds.Bottom - 44f), body, 0.55f);
     }
 
     private bool TryMoveFromMouse(Point mousePosition)
     {
-        var bounds = GetBoardBounds(ScreenManager.GraphicsDevice.Viewport);
+        var bounds = ScreenManager.GraphicsDevice.Viewport.Bounds;
         if (!bounds.Contains(mousePosition))
         {
             return false;
         }
 
-        var tileSize = bounds.Width / board.Size;
-        var column = Math.Clamp((mousePosition.X - bounds.X) / tileSize, 0, board.Size - 1);
-        var row = Math.Clamp((mousePosition.Y - bounds.Y) / tileSize, 0, board.Size - 1);
+        var column = Math.Clamp(((mousePosition.X - bounds.X) * board.Size) / Math.Max(1, bounds.Width), 0, board.Size - 1);
+        var row = Math.Clamp(((mousePosition.Y - bounds.Y) * board.Size) / Math.Max(1, bounds.Height), 0, board.Size - 1);
         return board.TryMovePosition((row * board.Size) + column);
     }
 
-    private void ShowSolvedDialog(PlayerIndex playerIndex)
+    private void ShowOptions(PlayerIndex playerIndex)
     {
-        if (solvedPopupShown)
+        pendingCommands.Clear();
+        commandTimer = 0d;
+        restoreFlowPending = false;
+        sessionFlow = SessionFlow.Options;
+        LoadingScreen.Load(ScreenManager, false, playerIndex, new PreviewScreen(CurrentPuzzleImage, Color.Gray), new InGameOptionsScreen(this));
+    }
+
+    private void ShowWinScreen(PlayerIndex playerIndex)
+    {
+        if (winFlowShown)
         {
             return;
         }
 
-        solvedPopupShown = true;
+        winFlowShown = true;
+        pendingCommands.Clear();
+        commandTimer = 0d;
+        restoreFlowPending = false;
+        sessionFlow = SessionFlow.Win;
 
-        var dialog = new MessageBoxScreen(
-            $"Congratulations!\\n\\nSolved in {elapsedTime:mm\\:ss} with {moveCount} moves.\\n\\nPlay again?",
-            includeCancel: true,
-            acceptText: "Play Again",
-            cancelText: "Main Menu");
+        var winScreen = new WinScreen(playingTime, moveCount);
+        winScreen.Accepted += (_, e) => LoadingScreen.Load(ScreenManager, true, e.PlayerIndex, new GameplayScreen());
+        winScreen.Cancelled += (_, e) => LoadingScreen.Load(ScreenManager, true, e.PlayerIndex, new BackgroundScreen(), new MainMenuScreen(() => new GameplayScreen()));
 
-        dialog.Accepted += (_, e) =>
+        ScreenManager.AddScreen(winScreen, playerIndex);
+    }
+
+    private bool TryMove(Keys command)
+    {
+        return command switch
         {
-            LoadingScreen.Load(ScreenManager, true, e.PlayerIndex, new BackgroundScreen(), new GameplayScreen());
+            Keys.Up => board.TryMoveBlankByOffset(0, 1),
+            Keys.Down => board.TryMoveBlankByOffset(0, -1),
+            Keys.Left => board.TryMoveBlankByOffset(1, 0),
+            Keys.Right => board.TryMoveBlankByOffset(-1, 0),
+            _ => false,
         };
+    }
 
-        dialog.Cancelled += (_, e) =>
+    private void QueueHeldCommand(Keys command)
+    {
+        if (command == Keys.None || pendingCommands.Contains(command))
         {
-            ReturnToMainMenu(e.PlayerIndex);
+            return;
+        }
+
+        pendingCommands.Enqueue(command);
+    }
+
+    private Keys GetHeldMovementCommand()
+    {
+        var keyboardState = GetKeyboardState();
+
+        if (keyboardState.IsKeyDown(Keys.Up) || keyboardState.IsKeyDown(Keys.W))
+        {
+            return Keys.Up;
+        }
+
+        if (keyboardState.IsKeyDown(Keys.Down) || keyboardState.IsKeyDown(Keys.S))
+        {
+            return Keys.Down;
+        }
+
+        if (keyboardState.IsKeyDown(Keys.Left) || keyboardState.IsKeyDown(Keys.A))
+        {
+            return Keys.Left;
+        }
+
+        if (keyboardState.IsKeyDown(Keys.Right) || keyboardState.IsKeyDown(Keys.D))
+        {
+            return Keys.Right;
+        }
+
+        return Keys.None;
+    }
+
+    private bool IsShowingLivePreview()
+    {
+        var keyboardState = GetKeyboardState();
+        return keyboardState.IsKeyDown(Keys.Enter) || keyboardState.IsKeyDown(Keys.F1);
+    }
+
+    private KeyboardState GetKeyboardState()
+    {
+        var playerIndex = (int)(ControllingPlayer ?? PlayerIndex.One);
+        return ScreenManager.Input.CurrentKeyboardStates[playerIndex];
+    }
+
+    private static Rectangle GetCellBounds(Rectangle bounds, int row, int column, int gridSize)
+    {
+        var left = bounds.X + ((column * bounds.Width) / gridSize);
+        var top = bounds.Y + ((row * bounds.Height) / gridSize);
+        var right = bounds.X + (((column + 1) * bounds.Width) / gridSize);
+        var bottom = bounds.Y + (((row + 1) * bounds.Height) / gridSize);
+        return new Rectangle(left, top, right - left, bottom - top);
+    }
+
+    private static string SelectPuzzleImage()
+    {
+        var index = lastUsedPuzzleIndex;
+        while (PuzzleImages.Length > 1 && index == lastUsedPuzzleIndex)
+        {
+            index = PuzzleRandom.Next(0, PuzzleImages.Length);
+        }
+
+        lastUsedPuzzleIndex = index;
+        return GetPuzzleImageAssetName(index);
+    }
+
+    private static string GetPuzzleImageAssetName(int puzzleImageIndex)
+    {
+        if (puzzleImageIndex < 0 || puzzleImageIndex >= PuzzleImages.Length)
+        {
+            throw new InvalidDataException($"Unsupported puzzle image index '{puzzleImageIndex}'.");
+        }
+
+        return $"Puzzles/{PuzzleImages[puzzleImageIndex]}";
+    }
+
+    private static int GetPuzzleImageIndex(string puzzleImageAssetName)
+    {
+        for (var index = 0; index < PuzzleImages.Length; index++)
+        {
+            if (string.Equals(puzzleImageAssetName, GetPuzzleImageAssetName(index), StringComparison.Ordinal))
+            {
+                return index;
+            }
+        }
+
+        throw new InvalidOperationException($"Unsupported puzzle image '{puzzleImageAssetName}'.");
+    }
+
+    private static void EnsureSupportedPuzzleImage(string puzzleImageAssetName) => _ = GetPuzzleImageIndex(puzzleImageAssetName);
+
+    private static void RememberPuzzleImage(string puzzleImageAssetName)
+    {
+        lastUsedPuzzleIndex = GetPuzzleImageIndex(puzzleImageAssetName);
+    }
+
+    private static TimeSpan ReadNonNegativeTimeSpan(BinaryReader reader)
+    {
+        var ticks = reader.ReadInt64();
+        if (ticks < 0)
+        {
+            throw new InvalidDataException("Gameplay time cannot be negative.");
+        }
+
+        try
+        {
+            return TimeSpan.FromTicks(ticks);
+        }
+        catch (ArgumentOutOfRangeException ex)
+        {
+            throw new InvalidDataException("Gameplay time is out of range.", ex);
+        }
+    }
+
+    private static int ReadNonNegativeInteger(BinaryReader reader, string valueName)
+    {
+        var value = reader.ReadInt32();
+        if (value < 0)
+        {
+            throw new InvalidDataException($"{valueName} cannot be negative.");
+        }
+
+        return value;
+    }
+
+    private static SessionFlow ReadSessionFlow(int rawValue)
+    {
+        return rawValue switch
+        {
+            (int)SessionFlow.Active => SessionFlow.Active,
+            (int)SessionFlow.Options => SessionFlow.Options,
+            (int)SessionFlow.Win => SessionFlow.Win,
+            _ => throw new InvalidDataException($"Unsupported gameplay flow '{rawValue}'."),
         };
-
-        ScreenManager.AddScreen(dialog, playerIndex);
     }
 
-    private void ReturnToMainMenu(PlayerIndex playerIndex)
+    private void ValidateRestoredFlow(SessionFlow restoredFlow)
     {
-        LoadingScreen.Load(ScreenManager, true, playerIndex, new BackgroundScreen(), new MainMenuScreen(() => new GameplayScreen()));
-    }
+        if (restoredFlow == SessionFlow.Win && !board.IsSolved)
+        {
+            throw new InvalidDataException("Win flow requires a solved puzzle board.");
+        }
 
-    private Rectangle GetBoardBounds(Viewport viewport)
-    {
-        var size = Math.Min(viewport.Width - 180, viewport.Height - 220);
-        size = Math.Max(size, 320);
-        var x = (viewport.Width - size) / 2;
-        var y = 138;
-        return new Rectangle(x, y, size, size);
-    }
-
-    private void DrawPanel(SpriteBatch spriteBatch, Rectangle bounds, Color fill, Color border)
-    {
-        spriteBatch.Draw(ScreenManager.BlankTexture, bounds, fill);
-        DrawFrame(spriteBatch, bounds, border);
-    }
-
-    private void DrawFrame(SpriteBatch spriteBatch, Rectangle bounds, Color color)
-    {
-        var texture = ScreenManager.BlankTexture;
-        const int thickness = 2;
-        spriteBatch.Draw(texture, new Rectangle(bounds.Left, bounds.Top, bounds.Width, thickness), color);
-        spriteBatch.Draw(texture, new Rectangle(bounds.Left, bounds.Bottom - thickness, bounds.Width, thickness), color);
-        spriteBatch.Draw(texture, new Rectangle(bounds.Left, bounds.Top, thickness, bounds.Height), color);
-        spriteBatch.Draw(texture, new Rectangle(bounds.Right - thickness, bounds.Top, thickness, bounds.Height), color);
-    }
-
-    private static Color GetTileColor(int tile)
-    {
-        var blend = (tile - 1f) / 14f;
-        return Color.Lerp(new Color(69, 116, 184), new Color(219, 126, 70), blend);
+        if (restoredFlow != SessionFlow.Win && board.IsSolved)
+        {
+            throw new InvalidDataException("Solved puzzle boards must restore through the win flow.");
+        }
     }
 
     private static void DrawShadowedString(SpriteBatch spriteBatch, SpriteFont font, string text, Vector2 position, Color color, float scale)
     {
-        spriteBatch.DrawString(font, text, position + new Vector2(2f, 2f), Color.Black * 0.45f, 0f, Vector2.Zero, scale, SpriteEffects.None, 0f);
+        spriteBatch.DrawString(font, text, position + new Vector2(2f, 2f), Color.Black * 0.5f, 0f, Vector2.Zero, scale, SpriteEffects.None, 0f);
         spriteBatch.DrawString(font, text, position, color, 0f, Vector2.Zero, scale, SpriteEffects.None, 0f);
+    }
+
+    private enum SessionFlow
+    {
+        Active = 0,
+        Options = 1,
+        Win = 2,
     }
 }

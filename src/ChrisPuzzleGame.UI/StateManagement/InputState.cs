@@ -22,6 +22,7 @@ public sealed class InputState
     public MouseState CurrentMouseState { get; private set; }
     public MouseState LastMouseState { get; private set; }
     public Point MousePosition => CurrentMouseState.Position;
+    public int MouseWheelDelta => CurrentMouseState.ScrollWheelValue - LastMouseState.ScrollWheelValue;
     public void Update()
     {
         for (var i = 0; i < MaxInputs; i++)
@@ -63,6 +64,11 @@ public sealed class InputState
         playerIndex = controllingPlayer ?? PlayerIndex.One;
         return CurrentMouseState.LeftButton == ButtonState.Pressed && LastMouseState.LeftButton == ButtonState.Released;
     }
+    public bool IsNewRightClick(PlayerIndex? controllingPlayer, out PlayerIndex playerIndex)
+    {
+        playerIndex = controllingPlayer ?? PlayerIndex.One;
+        return CurrentMouseState.RightButton == ButtonState.Pressed && LastMouseState.RightButton == ButtonState.Released;
+    }
     public bool IsMenuSelect(PlayerIndex? controllingPlayer, out PlayerIndex playerIndex)
     {
         return IsNewKeyPress(Keys.Enter, controllingPlayer, out playerIndex) || IsNewKeyPress(Keys.Space, controllingPlayer, out playerIndex) || IsNewButtonPress(Buttons.A, controllingPlayer, out playerIndex) || IsNewButtonPress(Buttons.Start, controllingPlayer, out playerIndex);
@@ -73,14 +79,32 @@ public sealed class InputState
     }
     public bool IsMenuUp(PlayerIndex? controllingPlayer)
     {
-        return IsNewKeyPress(Keys.Up, controllingPlayer, out _) || IsNewKeyPress(Keys.W, controllingPlayer, out _) || IsNewButtonPress(Buttons.DPadUp, controllingPlayer, out _) || IsNewButtonPress(Buttons.LeftThumbstickUp, controllingPlayer, out _);
+        return IsNewKeyPress(Keys.Up, controllingPlayer, out _) || IsNewKeyPress(Keys.W, controllingPlayer, out _) || IsNewKeyPress(Keys.PageUp, controllingPlayer, out _) || IsTabPress(controllingPlayer, reverse: true) || IsNewButtonPress(Buttons.DPadUp, controllingPlayer, out _) || IsNewButtonPress(Buttons.LeftThumbstickUp, controllingPlayer, out _);
     }
     public bool IsMenuDown(PlayerIndex? controllingPlayer)
     {
-        return IsNewKeyPress(Keys.Down, controllingPlayer, out _) || IsNewKeyPress(Keys.S, controllingPlayer, out _) || IsNewButtonPress(Buttons.DPadDown, controllingPlayer, out _) || IsNewButtonPress(Buttons.LeftThumbstickDown, controllingPlayer, out _);
+        return IsNewKeyPress(Keys.Down, controllingPlayer, out _) || IsNewKeyPress(Keys.S, controllingPlayer, out _) || IsNewKeyPress(Keys.PageDown, controllingPlayer, out _) || IsTabPress(controllingPlayer, reverse: false) || IsNewButtonPress(Buttons.DPadDown, controllingPlayer, out _) || IsNewButtonPress(Buttons.LeftThumbstickDown, controllingPlayer, out _);
     }
     public bool IsPauseGame(PlayerIndex? controllingPlayer)
     {
         return IsMenuCancel(controllingPlayer, out _) || IsNewButtonPress(Buttons.Start, controllingPlayer, out _);
+    }
+    private bool IsTabPress(PlayerIndex? controllingPlayer, bool reverse)
+    {
+        if (controllingPlayer.HasValue)
+        {
+            var index = (int)controllingPlayer.Value;
+            var currentState = CurrentKeyboardStates[index];
+            var lastState = LastKeyboardStates[index];
+            if (!currentState.IsKeyDown(Keys.Tab) || !lastState.IsKeyUp(Keys.Tab))
+            {
+                return false;
+            }
+
+            var shiftDown = currentState.IsKeyDown(Keys.LeftShift) || currentState.IsKeyDown(Keys.RightShift);
+            return reverse ? shiftDown : !shiftDown;
+        }
+
+        return IsTabPress(PlayerIndex.One, reverse) || IsTabPress(PlayerIndex.Two, reverse) || IsTabPress(PlayerIndex.Three, reverse) || IsTabPress(PlayerIndex.Four, reverse);
     }
 }
