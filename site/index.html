@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Chris' Puzzle Game | MonoGame Windows Port</title>
+  <meta
+    name="description"
+    content="Chris' Puzzle Game is a MonoGame port of the original XNA / Windows Phone 7 sliding tile puzzle by Christian Resma Helle."
+  >
+  <meta name="theme-color" content="#0b1320">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#content">Skip to content</a>
+
+  <header class="hero">
+    <div class="hero__backdrop" aria-hidden="true"></div>
+    <div class="shell hero__layout">
+      <div class="hero__copy">
+        <p class="eyebrow">MonoGame Windows Port</p>
+        <h1>Chris' Puzzle Game</h1>
+        <p class="hero__lede">
+          A desktop-friendly revival of the original XNA / Windows Phone 7 sliding puzzle,
+          rebuilt with MonoGame for modern Windows machines.
+        </p>
+        <p class="hero__summary">
+          This project keeps the original game's simple 4×4 sliding puzzle loop intact while
+          adding the kind of keyboard, mouse, scaling, and window behavior that feels natural on desktop.
+        </p>
+
+        <div class="hero__actions">
+          <a class="button button--primary" href="https://github.com/christianhelle/puzzlegame-mono">View Source</a>
+          <a class="button button--ghost" href="https://github.com/christianhelle/xnapuzzlegame">Original XNA Repo</a>
+        </div>
+
+        <ul class="hero__stats" aria-label="Project highlights">
+          <li>
+            <strong>Status</strong>
+            <span>Fully playable</span>
+          </li>
+          <li>
+            <strong>Platform</strong>
+            <span>Windows + .NET 9</span>
+          </li>
+          <li>
+            <strong>Window</strong>
+            <span>1200×720 default, resizable</span>
+          </li>
+          <li>
+            <strong>Input</strong>
+            <span>Keyboard, mouse, Tab, wheel</span>
+          </li>
+        </ul>
+      </div>
+
+      <aside class="hero__panel" aria-label="Project artwork and quick facts">
+        <figure class="hero__art">
+          <img
+            src="assets/puzzles/Penguins.jpg"
+            alt="Penguins puzzle artwork included with Chris' Puzzle Game"
+            width="800"
+            height="600"
+          >
+          <figcaption>Included puzzle artwork, used in-game as one of the playable images.</figcaption>
+        </figure>
+
+        <div class="hero__panel-card">
+          <h2>What this page is showing</h2>
+          <p>
+            The gallery below uses the project's real puzzle images from the MonoGame content pipeline.
+            It does not use fabricated screenshots.
+          </p>
+        </div>
+      </aside>
+    </div>
+  </header>
+
+  <nav class="section-nav shell" aria-label="Section navigation">
+    <a href="#overview">Overview</a>
+    <a href="#status">Features &amp; Status</a>
+    <a href="#controls">Controls</a>
+    <a href="#build">Build &amp; Run</a>
+    <a href="#artwork">Puzzle Artwork</a>
+    <a href="#links">Links</a>
+  </nav>
+
+  <main id="content">
+    <section id="overview" class="section shell">
+      <div class="section-heading">
+        <p class="eyebrow">Overview</p>
+        <h2>A classic puzzle loop, adapted for desktop play</h2>
+      </div>
+
+      <div class="grid grid--two">
+        <article class="card">
+          <h3>What it is</h3>
+          <p>
+            Chris' Puzzle Game is a classic sliding tile game: one square is empty, the rest are scrambled,
+            and you slide adjacent pieces until the full image is restored. This version is built with
+            <strong>MonoGame</strong> for Windows and intentionally follows the feel of the older
+            <strong>XNA / Windows Phone 7</strong> release.
+          </p>
+          <p>
+            The original project still matters here—the MonoGame port uses
+            <a href="https://github.com/christianhelle/xnapuzzlegame">christianhelle/xnapuzzlegame</a>
+            as its behavior reference.
+          </p>
+        </article>
+
+        <article class="card">
+          <h3>How play works</h3>
+          <p>
+            Start a new game, get a random puzzle image, and move tiles into the empty space until the picture is complete.
+            Once solved, the game shows a congratulations screen with your total time and move count, then lets you play again
+            or return to the main menu.
+          </p>
+          <ul class="list">
+            <li>4×4 sliding puzzle board</li>
+            <li>Eight included puzzle images</li>
+            <li>Live solved-image preview while holding Enter or F1</li>
+            <li>In-game pause/options flow through Esc</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <section id="status" class="section shell">
+      <div class="section-heading">
+        <p class="eyebrow">Features &amp; Status</p>
+        <h2>Playable now, with desktop polish where it matters</h2>
+      </div>
+
+      <div class="grid grid--three">
+        <article class="feature-card">
+          <h3>Readable menus</h3>
+          <p>
+            Main menu flow supports keyboard, mouse, mouse wheel, and Tab navigation so the interface stays comfortable
+            across typical desktop input styles.
+          </p>
+        </article>
+
+        <article class="feature-card">
+          <h3>Responsive layout</h3>
+          <p>
+            The game launches at 1200×720, allows window resizing, and targets modern Windows high-DPI behavior with
+            PerMonitorV2 awareness.
+          </p>
+        </article>
+
+        <article class="feature-card">
+          <h3>Progress-friendly flow</h3>
+          <p>
+            Session persistence restores progress after exit, and the win screen reports both time and move count for each solved puzzle.
+          </p>
+        </article>
+      </div>
+
+      <div class="table-card">
+        <table>
+          <caption>Implemented status from the current repository</caption>
+          <thead>
+            <tr>
+              <th scope="col">Feature</th>
+              <th scope="col">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Main menu with keyboard, mouse, and Tab navigation</td>
+              <td>Working</td>
+            </tr>
+            <tr>
+              <td>New game and random puzzle selection</td>
+              <td>Working</td>
+            </tr>
+            <tr>
+              <td>4×4 sliding puzzle gameplay</td>
+              <td>Working</td>
+            </tr>
+            <tr>
+              <td>Arrow keys, WASD, and click-to-move controls</td>
+              <td>Working</td>
+            </tr>
+            <tr>
+              <td>Live preview while holding Enter or F1</td>
+              <td>Working</td>
+            </tr>
+            <tr>
+              <td>Win screen with time and move count</td>
+              <td>Working</td>
+            </tr>
+            <tr>
+              <td>Play Again and Main Menu flow</td>
+              <td>Working</td>
+            </tr>
+            <tr>
+              <td>In-game options via Esc</td>
+              <td>Working</td>
+            </tr>
+            <tr>
+              <td>Session persistence on exit and restore</td>
+              <td>Working</td>
+            </tr>
+            <tr>
+              <td>Credits screen</td>
+              <td>Working</td>
+            </tr>
+            <tr>
+              <td>Resizable window with layout scaling</td>
+              <td>Working</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="controls" class="section shell">
+      <div class="section-heading">
+        <p class="eyebrow">Controls</p>
+        <h2>Keyboard and mouse both feel first-class</h2>
+      </div>
+
+      <div class="grid grid--two">
+        <article class="table-card">
+          <h3>Menus</h3>
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Input</th>
+                <th scope="col">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>↑ / ↓ / Tab / Mouse Wheel</td>
+                <td>Navigate menu entries</td>
+              </tr>
+              <tr>
+                <td>Enter / Left Click</td>
+                <td>Select</td>
+              </tr>
+              <tr>
+                <td>Esc / Right Click</td>
+                <td>Back or exit</td>
+              </tr>
+            </tbody>
+          </table>
+        </article>
+
+        <article class="table-card">
+          <h3>Gameplay</h3>
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Input</th>
+                <th scope="col">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Arrow Keys / WASD</td>
+                <td>Slide tiles</td>
+              </tr>
+              <tr>
+                <td>Left Click</td>
+                <td>Move an adjacent tile</td>
+              </tr>
+              <tr>
+                <td>R / F5</td>
+                <td>Reshuffle the puzzle</td>
+              </tr>
+              <tr>
+                <td>Enter / F1 (hold)</td>
+                <td>Preview the solved image</td>
+              </tr>
+              <tr>
+                <td>Esc</td>
+                <td>Open in-game options</td>
+              </tr>
+            </tbody>
+          </table>
+        </article>
+      </div>
+    </section>
+
+    <section id="build" class="section shell">
+      <div class="section-heading">
+        <p class="eyebrow">Build &amp; Run</p>
+        <h2>Simple Windows setup</h2>
+      </div>
+
+      <div class="grid grid--two">
+        <article class="card">
+          <h3>Prerequisites</h3>
+          <ul class="list">
+            <li><a href="https://dotnet.microsoft.com/download/dotnet/9.0">.NET 9 SDK</a> or later</li>
+            <li>Windows, targeting <code>net9.0-windows</code> with DirectX</li>
+          </ul>
+        </article>
+
+        <article class="card">
+          <h3>Runtime notes</h3>
+          <ul class="list">
+            <li>Default window size is 1200×720</li>
+            <li>Window resizing is enabled</li>
+            <li>Session progress is saved and restored between runs</li>
+          </ul>
+        </article>
+      </div>
+
+      <div class="grid grid--two">
+        <article class="code-card">
+          <h3>Build</h3>
+          <pre><code>dotnet build ChrisPuzzleGame.slnx</code></pre>
+        </article>
+
+        <article class="code-card">
+          <h3>Run</h3>
+          <pre><code>dotnet run --project src\ChrisPuzzleGame.UI\ChrisPuzzleGame.UI.csproj</code></pre>
+        </article>
+      </div>
+    </section>
+
+    <section id="artwork" class="section shell">
+      <div class="section-heading">
+        <p class="eyebrow">Puzzle Artwork</p>
+        <h2>Included image set from the game content</h2>
+        <p class="section-copy">
+          These are the actual puzzle images shipped with the MonoGame project and used for random puzzle selection in-game.
+        </p>
+      </div>
+
+      <div class="gallery">
+        <figure class="gallery__item">
+          <img src="assets/puzzles/Chrysanthemum.jpg" alt="Chrysanthemum puzzle artwork" width="800" height="600">
+          <figcaption>Chrysanthemum</figcaption>
+        </figure>
+        <figure class="gallery__item">
+          <img src="assets/puzzles/Desert.jpg" alt="Desert puzzle artwork" width="800" height="600">
+          <figcaption>Desert</figcaption>
+        </figure>
+        <figure class="gallery__item">
+          <img src="assets/puzzles/Hydrangeas.jpg" alt="Hydrangeas puzzle artwork" width="800" height="600">
+          <figcaption>Hydrangeas</figcaption>
+        </figure>
+        <figure class="gallery__item">
+          <img src="assets/puzzles/Jellyfish.jpg" alt="Jellyfish puzzle artwork" width="800" height="600">
+          <figcaption>Jellyfish</figcaption>
+        </figure>
+        <figure class="gallery__item">
+          <img src="assets/puzzles/Koala.jpg" alt="Koala puzzle artwork" width="800" height="600">
+          <figcaption>Koala</figcaption>
+        </figure>
+        <figure class="gallery__item">
+          <img src="assets/puzzles/Lighthouse.jpg" alt="Lighthouse puzzle artwork" width="800" height="600">
+          <figcaption>Lighthouse</figcaption>
+        </figure>
+        <figure class="gallery__item">
+          <img src="assets/puzzles/Penguins.jpg" alt="Penguins puzzle artwork" width="800" height="600">
+          <figcaption>Penguins</figcaption>
+        </figure>
+        <figure class="gallery__item">
+          <img src="assets/puzzles/Tulips.jpg" alt="Tulips puzzle artwork" width="800" height="600">
+          <figcaption>Tulips</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section id="links" class="section shell">
+      <div class="section-heading">
+        <p class="eyebrow">Links</p>
+        <h2>Follow the port or compare it with the original</h2>
+      </div>
+
+      <div class="grid grid--three">
+        <article class="link-card">
+          <h3>Source repository</h3>
+          <p>Browse the MonoGame port, build it locally, or follow progress in the main repository.</p>
+          <a href="https://github.com/christianhelle/puzzlegame-mono">github.com/christianhelle/puzzlegame-mono</a>
+        </article>
+
+        <article class="link-card">
+          <h3>Original XNA game</h3>
+          <p>See the older Windows Phone 7 codebase that this port uses as the gameplay and flow reference.</p>
+          <a href="https://github.com/christianhelle/xnapuzzlegame">github.com/christianhelle/xnapuzzlegame</a>
+        </article>
+
+        <article class="link-card">
+          <h3>Author</h3>
+          <p>Created by Christian Resma Helle.</p>
+          <a href="https://christianhelle.com">christianhelle.com</a>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="shell footer__layout">
+      <p><strong>Chris' Puzzle Game</strong> is a MonoGame port of the original XNA / Windows Phone 7 release.</p>
+      <p>For licensing details, refer to the original XNA repository.</p>
+    </div>
+  </footer>
+</body>
+</html>

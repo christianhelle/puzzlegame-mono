@@ -50,6 +50,16 @@ The game window opens at **1200×720** by default and is resizable.
 
 ---
 
+## Website
+
+The repository's static site lives under `site/` and is deployed to **GitHub Pages** with `.github\workflows\pages.yml`.
+
+- Pushes to `main` that change `site/` (or the Pages workflow itself) trigger a deployment.
+- You can also run the Pages workflow manually from the **Actions** tab.
+- The committed `site\.nojekyll` file keeps Pages publishing the static files as-is.
+
+---
+
 ## Controls
 
 ### Menus
@@ -87,6 +97,7 @@ When you solve the puzzle, a **Congratulations** screen shows your completion ti
 ```
 puzzlegame-mono/
 ├── ChrisPuzzleGame.slnx           # Solution file (VS 2022+)
+├── site/                          # Static website published with GitHub Pages
 └── src/
     └── ChrisPuzzleGame.UI/        # Main game project
         ├── Content/               # MonoGame content (images, fonts, puzzles)
