@@ -1,4 +1,5 @@
 using System;
+using ChrisPuzzleGame.Persistence;
 using ChrisPuzzleGame.Screens;
 using ChrisPuzzleGame.StateManagement;
 using Microsoft.Xna.Framework;
@@ -12,11 +13,13 @@ public sealed class PuzzleGame : Game
     private const int DefaultBackBufferHeight = 720;
 
     private readonly GraphicsDeviceManager graphics;
+    private readonly GameplayPersistence gameplayPersistence;
     private readonly ScreenManager screenManager;
 
     public PuzzleGame()
     {
         Content.RootDirectory = "Content";
+        gameplayPersistence = new GameplayPersistence();
 
         graphics = new GraphicsDeviceManager(this)
         {
@@ -32,9 +35,28 @@ public sealed class PuzzleGame : Game
 
         screenManager = new ScreenManager(this);
         Components.Add(screenManager);
+        Exiting += HandleGameExiting;
 
+        ConfigureStartupScreens();
+    }
+
+    private void ConfigureStartupScreens()
+    {
         screenManager.AddScreen(new BackgroundScreen(), null);
+
+        var savedGameplay = gameplayPersistence.TryLoad();
+        if (savedGameplay is not null)
+        {
+            screenManager.AddScreen(savedGameplay, null);
+            return;
+        }
+
         screenManager.AddScreen(new MainMenuScreen(() => new GameplayScreen()), null);
+    }
+
+    private void HandleGameExiting(object? sender, EventArgs e)
+    {
+        gameplayPersistence.SaveOrDelete(screenManager);
     }
 
     protected override void Draw(GameTime gameTime)

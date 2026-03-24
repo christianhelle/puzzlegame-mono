@@ -83,6 +83,102 @@ public sealed class GameplayScreen : GameScreen
         gameTimerFont = null;
     }
 
+    public override void Serialize(Stream stream)
+    {
+        ArgumentNullException.ThrowIfNull(stream);
+
+        if (!boardInitialized || string.IsNullOrWhiteSpace(CurrentPuzzleImage))
+        {
+            throw new InvalidOperationException("Gameplay state is not ready to be persisted.");
+        }
+
+        using var writer = new BinaryWriter(stream, Encoding.UTF8, leaveOpen: true);
+        writer.Write(SaveDataVersion);
+        writer.Write(CurrentPuzzleImage);
+        writer.Write(playingTime.Ticks);
+        writer.Write(moveCount);
+        writer.Write((int)sessionFlow);
+        writer.Write(board.Size);
+
+        foreach (var tile in board.GetTiles())
+        {
+            writer.Write(tile);
+        }
+    }
+
+    public override void Deserialize(Stream stream)
+    {
+        ArgumentNullException.ThrowIfNull(stream);
+
+        using var reader = new BinaryReader(stream, Encoding.UTF8, leaveOpen: true);
+        var saveDataVersion = reader.ReadInt32();
+
+        string restoredPuzzleImage;
+        TimeSpan restoredPlayingTime;
+        int restoredMoveCount;
+        SessionFlow restoredFlow;
+
+        switch (saveDataVersion)
+        {
+            case 1:
+                restoredPuzzleImage = GetPuzzleImageAssetName(reader.ReadInt32());
+                restoredPlayingTime = ReadNonNegativeTimeSpan(reader);
+                restoredMoveCount = ReadNonNegativeInteger(reader, "Move count");
+                restoredFlow = SessionFlow.Active;
+                break;
+            case SaveDataVersion:
+                restoredPuzzleImage = reader.ReadString();
+                EnsureSupportedPuzzleImage(restoredPuzzleImage);
+                restoredPlayingTime = ReadNonNegativeTimeSpan(reader);
+                restoredMoveCount = ReadNonNegativeInteger(reader, "Move count");
+                restoredFlow = ReadSessionFlow(reader.ReadInt32());
+                break;
+            default:
+                throw new InvalidDataException($"Unsupported gameplay save data version '{saveDataVersion}'.");
+        }
+
+        var boardSize = reader.ReadInt32();
+        if (boardSize != board.Size)
+        {
+            throw new InvalidDataException($"Unsupported puzzle board size '{boardSize}'.");
+        }
+
+        var restoredTiles = new int[boardSize * boardSize];
+        for (var index = 0; index < restoredTiles.Length; index++)
+        {
+            restoredTiles[index] = reader.ReadInt32();
+        }
+
+        try
+        {
+            board.Restore(restoredTiles);
+        }
+        catch (ArgumentException ex)
+        {
+            throw new InvalidDataException("Gameplay board state is invalid.", ex);
+        }
+
+        ValidateRestoredFlow(restoredFlow);
+
+        CurrentPuzzleImage = restoredPuzzleImage;
+        RememberPuzzleImage(CurrentPuzzleImage);
+        playingTime = restoredPlayingTime;
+        moveCount = restoredMoveCount;
+        pendingCommands.Clear();
+        commandTimer = 0d;
+        winFlowShown = false;
+        sessionFlow = restoredFlow;
+        restoreFlowPending = restoredFlow is SessionFlow.Options or SessionFlow.Win;
+        boardInitialized = true;
+        puzzleTexture = null;
+        gameTimerFont = null;
+
+        if (ScreenManager is not null)
+        {
+            LoadContent();
+        }
+    }
+
     public override void Update(GameTime gameTime, bool otherScreenHasFocus, bool coveredByOtherScreen)
     {
         base.Update(gameTime, otherScreenHasFocus, coveredByOtherScreen);

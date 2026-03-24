@@ -122,6 +122,57 @@ internal sealed class PuzzleBoard
         return true;
     }
 
+    public int[] GetTiles() => (int[])tiles.Clone();
+
+    public void Restore(int[] tileState)
+    {
+        ArgumentNullException.ThrowIfNull(tileState);
+
+        if (tileState.Length != tiles.Length)
+        {
+            throw new ArgumentException("Tile state length does not match the puzzle board.", nameof(tileState));
+        }
+
+        var restoredTiles = new int[tileState.Length];
+        var seenTiles = new bool[tileState.Length];
+        var restoredBlankIndex = -1;
+
+        for (var index = 0; index < tileState.Length; index++)
+        {
+            var tile = tileState[index];
+            if (tile < 0 || tile >= tileState.Length)
+            {
+                throw new ArgumentException("Tile state contains an out-of-range tile value.", nameof(tileState));
+            }
+
+            if (seenTiles[tile])
+            {
+                throw new ArgumentException("Tile state contains duplicate tile values.", nameof(tileState));
+            }
+
+            seenTiles[tile] = true;
+            restoredTiles[index] = tile;
+
+            if (tile == 0)
+            {
+                restoredBlankIndex = index;
+            }
+        }
+
+        if (restoredBlankIndex < 0)
+        {
+            throw new ArgumentException("Tile state is missing the blank tile.", nameof(tileState));
+        }
+
+        if (!IsSolvable(restoredTiles, restoredBlankIndex))
+        {
+            throw new ArgumentException("Tile state is not solvable.", nameof(tileState));
+        }
+
+        Array.Copy(restoredTiles, tiles, tiles.Length);
+        blankIndex = restoredBlankIndex;
+    }
+
     private List<int> GetNeighborIndexes(int index)
     {
         var row = index / Size;
@@ -154,5 +205,45 @@ internal sealed class PuzzleBoard
     private void Swap(int firstIndex, int secondIndex)
     {
         (tiles[firstIndex], tiles[secondIndex]) = (tiles[secondIndex], tiles[firstIndex]);
+    }
+
+    private bool IsSolvable(int[] tileState, int blankTileIndex)
+    {
+        var inversionCount = 0;
+        for (var firstIndex = 0; firstIndex < tileState.Length; firstIndex++)
+        {
+            var firstTile = tileState[firstIndex];
+            if (firstTile == 0)
+            {
+                continue;
+            }
+
+            for (var secondIndex = firstIndex + 1; secondIndex < tileState.Length; secondIndex++)
+            {
+                var secondTile = tileState[secondIndex];
+                if (secondTile == 0)
+                {
+                    continue;
+                }
+
+                if (firstTile > secondTile)
+                {
+                    inversionCount++;
+                }
+            }
+        }
+
+        if (Size % 2 != 0)
+        {
+            return inversionCount % 2 == 0;
+        }
+
+        var blankRowFromBottom = Size - (blankTileIndex / Size);
+        if (blankRowFromBottom % 2 == 0)
+        {
+            return inversionCount % 2 != 0;
+        }
+
+        return inversionCount % 2 == 0;
     }
 }

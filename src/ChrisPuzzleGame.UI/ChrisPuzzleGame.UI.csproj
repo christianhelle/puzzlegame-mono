@@ -17,6 +17,7 @@
     <Compile Include="UiProgram.cs" />
     <Compile Include="UiPuzzleGame.cs" />
     <Compile Include="Gameplay\PuzzleBoard.cs" />
+    <Compile Include="Persistence\GameplayPersistence.cs" />
     <Compile Include="StateManagement\GameScreen.cs" />
     <Compile Include="StateManagement\InputState.cs" />
     <Compile Include="StateManagement\ScreenManager.cs" />
