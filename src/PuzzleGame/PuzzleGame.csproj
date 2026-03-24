@@ -15,7 +15,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Program.cs" />
-    <Compile Include="UiPuzzleGame.cs" />
+    <Compile Include="Screens\DesktopUiChrome.cs" />
+    <Compile Include="StateManagement\ScreenState.cs" />
+    <Compile Include="PuzzleGame.cs" />
     <Compile Include="Gameplay\PuzzleBoard.cs" />
     <Compile Include="Persistence\GameplayPersistence.cs" />
     <Compile Include="StateManagement\GameScreen.cs" />

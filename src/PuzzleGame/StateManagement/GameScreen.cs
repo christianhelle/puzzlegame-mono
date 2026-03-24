@@ -4,14 +4,6 @@ using Microsoft.Xna.Framework;
 
 namespace PuzzleGame.StateManagement;
 
-public enum ScreenState
-{
-    TransitionOn,
-    Active,
-    TransitionOff,
-    Hidden,
-}
-
 public abstract class GameScreen
 {
     private bool otherScreenHasFocus;
