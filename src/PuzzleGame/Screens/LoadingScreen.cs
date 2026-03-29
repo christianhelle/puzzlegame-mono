@@ -27,9 +27,9 @@ public sealed class LoadingScreen : GameScreen
         PlayerIndex? controllingPlayer,
         params GameScreen[] screensToLoad)
     {
-        foreach (var screen in screenManager.GetScreens())
+        for (var i = screenManager.ScreenCount - 1; i >= 0; i--)
         {
-            screen.ExitScreen();
+            screenManager.GetScreenAt(i).ExitScreen();
         }
         var loadingScreen = new LoadingScreen(screenManager, loadingIsSlow, screensToLoad);
         screenManager.AddScreen(loadingScreen, controllingPlayer);
@@ -52,7 +52,7 @@ public sealed class LoadingScreen : GameScreen
 
     public override void Draw(GameTime gameTime)
     {
-        if (ScreenState == ScreenState.Active && ScreenManager.GetScreens().Length == 1)
+        if (ScreenState == ScreenState.Active && ScreenManager.ScreenCount == 1)
             otherScreensAreGone = true;
         if (!loadingIsSlow) return;
         var spriteBatch = ScreenManager.SpriteBatch;

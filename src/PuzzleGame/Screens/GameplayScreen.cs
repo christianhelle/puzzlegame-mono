@@ -34,6 +34,8 @@ public sealed class GameplayScreen : GameScreen
     private readonly Queue<Keys> pendingCommands = [];
 
     private readonly Random random = new();
+    private readonly Rectangle[] tileSourceBounds = new Rectangle[16];
+    private readonly Rectangle[] tileDestBounds = new Rectangle[16];
     private double commandTimer;
     private SpriteFont? gameTimerFont;
     private int moveCount;
@@ -43,6 +45,13 @@ public sealed class GameplayScreen : GameScreen
     private bool restoreFlowPending;
     private SessionFlow sessionFlow = SessionFlow.Active;
     private bool winFlowShown;
+    private Rectangle lastViewportBounds;
+    private bool tileDrawDataDirty = true;
+    private string cachedTimeText = string.Empty;
+    private string cachedMovesText = string.Empty;
+    private int cachedTimeMinutes = -1;
+    private int cachedTimeSeconds = -1;
+    private int cachedMoveCount = -1;
 
     private GameplayScreen(bool selectPuzzleImage)
     {
@@ -100,7 +109,9 @@ public sealed class GameplayScreen : GameScreen
         writer.Write((int)sessionFlow);
         writer.Write(board.Size);
 
-        foreach (var tile in board.GetTiles())
+        Span<int> tileBuffer = stackalloc int[board.Size * board.Size];
+        board.CopyTilesTo(tileBuffer);
+        foreach (var tile in tileBuffer)
         {
             writer.Write(tile);
         }
@@ -173,6 +184,7 @@ public sealed class GameplayScreen : GameScreen
         sessionFlow = restoredFlow;
         restoreFlowPending = restoredFlow is SessionFlow.Options or SessionFlow.Win;
         CanResume = true;
+        tileDrawDataDirty = true;
         puzzleTexture = null;
         gameTimerFont = null;
 
@@ -235,6 +247,7 @@ public sealed class GameplayScreen : GameScreen
             }
 
             moveCount++;
+            tileDrawDataDirty = true;
 
             if (board.IsSolved)
             {
@@ -282,6 +295,7 @@ public sealed class GameplayScreen : GameScreen
         }
 
         moveCount++;
+        tileDrawDataDirty = true;
 
         if (board.IsSolved)
         {
@@ -334,6 +348,7 @@ public sealed class GameplayScreen : GameScreen
         restoreFlowPending = false;
         sessionFlow = SessionFlow.Active;
         winFlowShown = false;
+        tileDrawDataDirty = true;
     }
 
     private void DrawPuzzle(SpriteBatch spriteBatch, Rectangle bounds)
@@ -343,7 +358,37 @@ public sealed class GameplayScreen : GameScreen
             return;
         }
 
-        for (var index = 0; index < board.Size * board.Size; index++)
+        if (tileDrawDataDirty || bounds != lastViewportBounds)
+        {
+            RebuildTileDrawData(bounds);
+        }
+
+        var tileCount = board.Size * board.Size;
+        for (var index = 0; index < tileCount; index++)
+        {
+            if (board.GetTileAt(index) == 0)
+            {
+                continue;
+            }
+
+            spriteBatch.Draw(
+                puzzleTexture,
+                tileDestBounds[index],
+                tileSourceBounds[index],
+                Color.White);
+        }
+    }
+
+    private void RebuildTileDrawData(Rectangle bounds)
+    {
+        var textureBounds = new Rectangle(
+            x: 0,
+            y: 0,
+            puzzleTexture!.Width,
+            puzzleTexture.Height);
+        var tileCount = board.Size * board.Size;
+
+        for (var index = 0; index < tileCount; index++)
         {
             var tile = board.GetTileAt(index);
             if (tile == 0)
@@ -357,19 +402,20 @@ public sealed class GameplayScreen : GameScreen
             var sourceRow = sourceIndex / board.Size;
             var sourceColumn = sourceIndex % board.Size;
 
-            var destinationBounds = GetCellBounds(
+            tileDestBounds[index] = GetCellBounds(
                 bounds,
                 destinationRow,
                 destinationColumn,
                 board.Size);
-            var sourceBounds = GetCellBounds(
-                new(x: 0, y: 0, puzzleTexture.Width, puzzleTexture.Height),
+            tileSourceBounds[index] = GetCellBounds(
+                textureBounds,
                 sourceRow,
                 sourceColumn,
                 board.Size);
-
-            spriteBatch.Draw(puzzleTexture, destinationBounds, sourceBounds, Color.White);
         }
+
+        lastViewportBounds = bounds;
+        tileDrawDataDirty = false;
     }
 
     private void DrawHud(SpriteBatch spriteBatch, Rectangle viewportBounds, bool isShowingPreview)
@@ -392,17 +438,32 @@ public sealed class GameplayScreen : GameScreen
             return;
         }
 
+        var minutes = playingTime.Minutes;
+        var seconds = playingTime.Seconds;
+        if (minutes != cachedTimeMinutes || seconds != cachedTimeSeconds)
+        {
+            cachedTimeMinutes = minutes;
+            cachedTimeSeconds = seconds;
+            cachedTimeText = $"Time {playingTime:mm\\:ss}";
+        }
+
+        if (moveCount != cachedMoveCount)
+        {
+            cachedMoveCount = moveCount;
+            cachedMovesText = $"Moves {moveCount}";
+        }
+
         DrawShadowedString(
             spriteBatch,
             font,
-            $"Time {playingTime:mm\\:ss}",
+            cachedTimeText,
             new(x: 16f, y: 12f),
             body,
             scale: 1f);
         DrawShadowedString(
             spriteBatch,
             font,
-            $"Moves {moveCount}",
+            cachedMovesText,
             new(x: 16f, y: 34f),
             body,
             scale: 1f);

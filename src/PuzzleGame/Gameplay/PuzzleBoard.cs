@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 
 namespace PuzzleGame.Gameplay;
 
@@ -54,17 +53,21 @@ internal sealed class PuzzleBoard
     {
         Reset();
 
+        Span<int> neighbors = stackalloc int[4];
         var previousBlankIndex = -1;
 
         for (var move = 0; move < moveCount; move++)
         {
-            var neighbors = GetNeighborIndexes(BlankIndex);
-            if (previousBlankIndex >= 0 && neighbors.Count > 1)
+            var neighborCount = WriteNeighborIndexes(BlankIndex, neighbors);
+            var validNeighbors = neighbors[..neighborCount];
+
+            if (previousBlankIndex >= 0 && neighborCount > 1)
             {
-                neighbors.Remove(previousBlankIndex);
+                neighborCount = RemoveValue(validNeighbors, previousBlankIndex);
+                validNeighbors = neighbors[..neighborCount];
             }
 
-            var nextBlankIndex = neighbors[random.Next(neighbors.Count)];
+            var nextBlankIndex = validNeighbors[random.Next(neighborCount)];
             previousBlankIndex = BlankIndex;
             Swap(BlankIndex, nextBlankIndex);
             BlankIndex = nextBlankIndex;
@@ -72,7 +75,7 @@ internal sealed class PuzzleBoard
 
         if (IsSolved)
         {
-            var neighbors = GetNeighborIndexes(BlankIndex);
+            var neighborCount = WriteNeighborIndexes(BlankIndex, neighbors);
             var nextBlankIndex = neighbors[0];
             Swap(BlankIndex, nextBlankIndex);
             BlankIndex = nextBlankIndex;
@@ -122,6 +125,8 @@ internal sealed class PuzzleBoard
     }
 
     public int[] GetTiles() => (int[])tiles.Clone();
+
+    public void CopyTilesTo(Span<int> destination) => tiles.AsSpan().CopyTo(destination);
 
     public void Restore(int[] tileState)
     {
@@ -178,33 +183,48 @@ internal sealed class PuzzleBoard
         BlankIndex = restoredBlankIndex;
     }
 
-    private List<int> GetNeighborIndexes(int index)
+    private int WriteNeighborIndexes(int index, Span<int> buffer)
     {
         var row = index / Size;
         var column = index % Size;
-        var neighbors = new List<int>(4);
+        var count = 0;
 
         if (row > 0)
         {
-            neighbors.Add(index - Size);
+            buffer[count++] = index - Size;
         }
 
         if (row < Size - 1)
         {
-            neighbors.Add(index + Size);
+            buffer[count++] = index + Size;
         }
 
         if (column > 0)
         {
-            neighbors.Add(index - 1);
+            buffer[count++] = index - 1;
         }
 
         if (column < Size - 1)
         {
-            neighbors.Add(index + 1);
+            buffer[count++] = index + 1;
         }
 
-        return neighbors;
+        return count;
+    }
+
+    private static int RemoveValue(Span<int> span, int value)
+    {
+        var count = span.Length;
+        for (var i = 0; i < count; i++)
+        {
+            if (span[i] == value)
+            {
+                span[i] = span[count - 1];
+                return count - 1;
+            }
+        }
+
+        return count;
     }
 
     private void Swap(int firstIndex, int secondIndex)
