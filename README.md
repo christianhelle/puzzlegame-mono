@@ -1,6 +1,6 @@
 # Chris' Puzzle Game
 
-A classic 4×4 sliding tile puzzle game, built with **MonoGame** for Windows.
+A classic 4×4 sliding tile puzzle game, built with **MonoGame** for Windows and Linux.
 
 > **This project is a MonoGame port of Chris' Puzzle Game**, originally released for Windows Phone 7 using XNA.  
 > The original XNA project is available at: [christianhelle/xnapuzzlegame](https://github.com/christianhelle/xnapuzzlegame)
@@ -9,7 +9,7 @@ A classic 4×4 sliding tile puzzle game, built with **MonoGame** for Windows.
 
 ## Project Status
 
-✅ **Fully Playable** — The desktop port is complete and runs on Windows.
+✅ **Fully Playable** — The desktop port is complete and runs on Windows and Linux.
 
 | Feature | Status |
 |---------|--------|
@@ -31,19 +31,19 @@ A classic 4×4 sliding tile puzzle game, built with **MonoGame** for Windows.
 
 ### Prerequisites
 
-- [.NET 9 SDK](https://dotnet.microsoft.com/download/dotnet/9.0) (or later)
-- Windows (the project targets `net9.0-windows` with DirectX)
+- [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0) (or later)
+- Windows or Linux (uses MonoGame DesktopGL — OpenGL + SDL2)
 
 ### Build
 
-```powershell
-dotnet build ChrisPuzzleGame.slnx
+```bash
+dotnet build PuzzleGame.slnx
 ```
 
 ### Run
 
-```powershell
-dotnet run --project src\ChrisPuzzleGame.UI\ChrisPuzzleGame.UI.csproj
+```bash
+dotnet run --project src/PuzzleGame/PuzzleGame.csproj
 ```
 
 The game window opens at **1200×720** by default and is resizable.
@@ -96,19 +96,20 @@ When you solve the puzzle, a **Congratulations** screen shows your completion ti
 
 ```
 puzzlegame-mono/
-├── ChrisPuzzleGame.slnx           # Solution file (VS 2022+)
+├── PuzzleGame.slnx                # Solution file (VS 2022+)
 ├── site/                          # Static website published with GitHub Pages
 └── src/
-    └── ChrisPuzzleGame.UI/        # Main game project
+    └── PuzzleGame/                # Main game project
         ├── Content/               # MonoGame content (images, fonts, puzzles)
+        │   ├── Fonts/             # Bundled TTF fonts (Liberation family)
         │   ├── Puzzles/           # Puzzle image assets
         │   └── Content.mgcb       # MonoGame Content Builder manifest
         ├── Gameplay/              # Puzzle board logic
         ├── Persistence/           # Save/load session state
         ├── Screens/               # Menu, gameplay, win, credits screens
         ├── StateManagement/       # Screen manager and input handling
-        ├── UiProgram.cs           # Entry point
-        └── UiPuzzleGame.cs        # Game class
+        ├── Program.cs             # Entry point
+        └── PuzzleGame.cs          # Game class
 ```
 
 ---

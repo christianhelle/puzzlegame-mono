@@ -12,7 +12,7 @@ with.
     Modify this string to change the font that will be imported.
     -->
     <!-- Original XNA font was Kootenay; use Georgia so Windows MonoGame builds stay deterministic on machines without that font. -->
-    <FontName>Georgia</FontName>
+    <FontName>Fonts/LiberationSerif-Regular.ttf</FontName>
 
     <!--
     Size is a float value, measured in points. Modify this value to change
