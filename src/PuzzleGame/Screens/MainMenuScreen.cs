@@ -38,11 +38,8 @@ public sealed class MainMenuScreen : MenuScreen
                 createGameplayScreen());
             return;
         }
-        ScreenManager.AddScreen(
-            new MessageBoxScreen(
-                "The desktop shell is in place and launches cleanly. Gameplay wiring can be plugged into this menu next.",
-                includeCancel: false),
-            e.PlayerIndex);
+
+        ScreenManager.AddScreen(new ImageSelectionScreen(), e.PlayerIndex);
     }
 
     private void CreditsMenuEntrySelected(object? sender, PlayerIndexEventArgs e)

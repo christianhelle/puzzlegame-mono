@@ -17,7 +17,7 @@ public sealed class GameplayScreen : GameScreen
     private const int SaveDataVersion = 2;
 
     private static readonly Random PuzzleRandom = new();
-    private static readonly string[] PuzzleImages =
+    internal static readonly string[] PuzzleImages =
     [
         "Chrysanthemum",
         "Desert",
@@ -61,6 +61,15 @@ public sealed class GameplayScreen : GameScreen
     }
 
     public GameplayScreen() : this(selectPuzzleImage: true) { }
+
+    public GameplayScreen(string puzzleImageAssetName)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(puzzleImageAssetName);
+        CurrentPuzzleImage = puzzleImageAssetName;
+        RememberPuzzleImage(puzzleImageAssetName);
+        TransitionOnTime = TimeSpan.Zero;
+        TransitionOffTime = TimeSpan.Zero;
+    }
 
     public string CurrentPuzzleImage { get; private set; }
 
@@ -534,13 +543,14 @@ public sealed class GameplayScreen : GameScreen
             ScreenManager,
             loadingIsSlow: true,
             e.PlayerIndex,
-            new GameplayScreen());
+            new BackgroundScreen(),
+            new ImageSelectionScreen());
         winScreen.Cancelled += (_, e) => LoadingScreen.Load(
             ScreenManager,
             loadingIsSlow: true,
             e.PlayerIndex,
             new BackgroundScreen(),
-            new MainMenuScreen(() => new GameplayScreen()));
+            new MainMenuScreen());
 
         ScreenManager.AddScreen(winScreen, playerIndex);
     }

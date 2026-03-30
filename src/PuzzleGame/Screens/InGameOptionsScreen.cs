@@ -58,7 +58,7 @@ public sealed class InGameOptionsScreen : MenuScreen
             loadingIsSlow: true,
             e.PlayerIndex,
             new BackgroundScreen(),
-            new MainMenuScreen(() => new GameplayScreen()));
+            new MainMenuScreen());
     }
 
     private void ResumeGame(PlayerIndex playerIndex)
