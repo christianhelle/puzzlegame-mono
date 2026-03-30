@@ -14,6 +14,8 @@ public sealed class ImageSelectionScreen : GameScreen
     private const int GridPadding = 20;
     private const int ItemSpacing = 24;
 
+    private static readonly RasterizerState ScissorRasterizer = new() { ScissorTestEnable = true };
+
     private readonly List<SelectionItem> items = [];
     private readonly Dictionary<string, Texture2D> thumbnailCache = [];
     private int selectedIndex;
@@ -192,7 +194,7 @@ public sealed class ImageSelectionScreen : GameScreen
             contentHeight);
 
         spriteBatch.End();
-        spriteBatch.Begin(rasterizerState: new RasterizerState { ScissorTestEnable = true });
+        spriteBatch.Begin(rasterizerState: ScissorRasterizer);
         ScreenManager.GraphicsDevice.ScissorRectangle = scissorRect;
 
         DrawItems(spriteBatch, font, gameTime);
