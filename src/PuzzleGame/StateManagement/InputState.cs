@@ -37,11 +37,12 @@ public sealed class InputState
 
     public void Update()
     {
+        var currentKeyboard = Keyboard.GetState();
         for (var i = 0; i < MaxInputs; i++)
         {
             LastKeyboardStates[i] = CurrentKeyboardStates[i];
             LastGamePadStates[i] = CurrentGamePadStates[i];
-            CurrentKeyboardStates[i] = Keyboard.GetState();
+            CurrentKeyboardStates[i] = currentKeyboard;
             CurrentGamePadStates[i] = GamePad.GetState((PlayerIndex)i);
             if (CurrentGamePadStates[i].IsConnected)
             {

@@ -132,6 +132,10 @@ public sealed class ScreenManager : DrawableGameComponent
 
     public GameScreen[] GetScreens() => [.. screens];
 
+    public int ScreenCount => screens.Count;
+
+    public GameScreen GetScreenAt(int index) => screens[index];
+
     public Rectangle GetSafeArea(
         float horizontalMarginRatio = 0.08f,
         float verticalMarginRatio = 0.08f)

@@ -140,16 +140,16 @@ internal sealed class GameplayPersistence
 
     private GameplayScreen? FindGameplayScreen(ScreenManager screenManager)
     {
-        var screens = screenManager.GetScreens();
-        for (var index = screens.Length - 1; index >= 0; index--)
+        for (var index = screenManager.ScreenCount - 1; index >= 0; index--)
         {
-            if (screens[index] is InGameOptionsScreen optionsScreen
+            var screen = screenManager.GetScreenAt(index);
+            if (screen is InGameOptionsScreen optionsScreen
              && optionsScreen.TryGetGameplayScreenForPersistence(out var pausedGameplayScreen))
             {
                 return pausedGameplayScreen;
             }
 
-            if (screens[index] is GameplayScreen gameplayScreen && gameplayScreen.CanResume)
+            if (screen is GameplayScreen gameplayScreen && gameplayScreen.CanResume)
             {
                 return gameplayScreen;
             }
