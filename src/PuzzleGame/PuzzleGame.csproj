@@ -1,16 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net9.0-windows</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <RollForward>Major</RollForward>
     <PublishReadyToRun>false</PublishReadyToRun>
     <TieredCompilation>false</TieredCompilation>
-    <UseWindowsForms>true</UseWindowsForms>
-    <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="MonoGame.Framework.WindowsDX" Version="3.8.*"/>
+    <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.*"/>
   </ItemGroup>
   <Target Name="RestoreMonoGameTools"
           Condition="'$(DesignTimeBuild)' != 'true'"
@@ -27,8 +25,8 @@
           Condition="'$(DesignTimeBuild)' != 'true'"
           DependsOnTargets="RestoreMonoGameTools"
           BeforeTargets="CopyFilesToOutputDirectory">
-    <RemoveDir Directories="$(MSBuildProjectDirectory)\Content\bin\Windows"/>
-    <RemoveDir Directories="$(MSBuildProjectDirectory)\Content\obj\Windows"/>
+    <RemoveDir Directories="$(MSBuildProjectDirectory)\Content\bin\DesktopGL"/>
+    <RemoveDir Directories="$(MSBuildProjectDirectory)\Content\obj\DesktopGL"/>
     <Exec WorkingDirectory="$(MSBuildProjectDirectory)\Content"
           Command="dotnet mgcb /@:Content.mgcb /rebuild /quiet"
           StandardOutputImportance="Low"/>
@@ -39,7 +37,7 @@
           BeforeTargets="CopyFilesToOutputDirectory">
     <RemoveDir Directories="$(OutDir)Content"/>
     <ItemGroup>
-      <_MonoGameBuiltContent Include="$(MSBuildProjectDirectory)\Content\bin\Windows\**\*"/>
+      <_MonoGameBuiltContent Include="$(MSBuildProjectDirectory)\Content\bin\DesktopGL\**\*"/>
     </ItemGroup>
     <Copy SourceFiles="@(_MonoGameBuiltContent)"
           DestinationFiles="@(_MonoGameBuiltContent->'$(OutDir)Content\%(RecursiveDir)%(Filename)%(Extension)')"
