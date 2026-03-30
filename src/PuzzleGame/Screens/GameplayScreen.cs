@@ -72,6 +72,7 @@ public sealed class GameplayScreen : GameScreen
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(puzzleImageAssetName);
         CurrentPuzzleImage = puzzleImageAssetName;
+        RememberPuzzleImage(puzzleImageAssetName);
         TransitionOnTime = TimeSpan.Zero;
         TransitionOffTime = TimeSpan.Zero;
     }
