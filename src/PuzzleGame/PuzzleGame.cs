@@ -9,7 +9,7 @@ namespace PuzzleGame;
 public sealed class PuzzleGame : Game
 {
     private const int DefaultBackBufferWidth = 1200;
-    private const int DefaultBackBufferHeight = 720;
+    private const int DefaultBackBufferHeight = 900;
 
     private readonly GameplayPersistence gameplayPersistence;
     private readonly ScreenManager screenManager;
@@ -49,9 +49,7 @@ public sealed class PuzzleGame : Game
             return;
         }
 
-        screenManager.AddScreen(
-            new MainMenuScreen(),
-            controllingPlayer: null);
+        screenManager.AddScreen(new MainMenuScreen(), controllingPlayer: null);
     }
 
     private void HandleGameExiting(object? sender, EventArgs e)
