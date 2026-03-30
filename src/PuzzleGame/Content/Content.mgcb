@@ -86,33 +86,3 @@
 /importer:TextureImporter
 /processor:TextureProcessor
 /build:Puzzles/Tulips.jpg;Puzzles/Tulips
-
-#begin Puzzles/Aurora.jpg
-/importer:TextureImporter
-/processor:TextureProcessor
-/build:Puzzles/Aurora.jpg;Puzzles/Aurora
-
-#begin Puzzles/Mosaic.jpg
-/importer:TextureImporter
-/processor:TextureProcessor
-/build:Puzzles/Mosaic.jpg;Puzzles/Mosaic
-
-#begin Puzzles/Sunset.jpg
-/importer:TextureImporter
-/processor:TextureProcessor
-/build:Puzzles/Sunset.jpg;Puzzles/Sunset
-
-#begin Puzzles/Ocean.jpg
-/importer:TextureImporter
-/processor:TextureProcessor
-/build:Puzzles/Ocean.jpg;Puzzles/Ocean
-
-#begin Puzzles/Mountain.jpg
-/importer:TextureImporter
-/processor:TextureProcessor
-/build:Puzzles/Mountain.jpg;Puzzles/Mountain
-
-#begin Puzzles/Nebula.jpg
-/importer:TextureImporter
-/processor:TextureProcessor
-/build:Puzzles/Nebula.jpg;Puzzles/Nebula

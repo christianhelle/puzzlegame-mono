@@ -27,12 +27,6 @@ public sealed class GameplayScreen : GameScreen
         "Lighthouse",
         "Penguins",
         "Tulips",
-        "Aurora",
-        "Mosaic",
-        "Sunset",
-        "Ocean",
-        "Mountain",
-        "Nebula",
     ];
 
     private static int lastUsedPuzzleIndex = -1;
