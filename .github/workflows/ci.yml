@@ -13,17 +13,22 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build-windows:
-    name: Build MonoGame port
-    runs-on: windows-2022
+  build:
+    name: Build (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
     timeout-minutes: 15
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-2022, ubuntu-latest]
 
     defaults:
       run:
-        shell: pwsh
+        shell: bash
 
     env:
-      PROJECT_PATH: src\ChrisPuzzleGame.UI\ChrisPuzzleGame.UI.csproj
+      PROJECT_PATH: src/PuzzleGame/PuzzleGame.csproj
 
     steps:
       - name: Checkout repository
@@ -32,11 +37,10 @@ jobs:
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 9.0.x
+          dotnet-version: 10.0.x
 
       - name: Restore dependencies and MonoGame tools
-        # ChrisPuzzleGame.UI.csproj restores the local dotnet-mgcb tool manifest before Restore.
         run: dotnet restore "${{ env.PROJECT_PATH }}"
 
-      - name: Build trusted UI project
-        run: dotnet build "${{ env.PROJECT_PATH }}" --configuration Release --no-restore --nologo /p:ContinuousIntegrationBuild=true
+      - name: Build
+        run: dotnet build "${{ env.PROJECT_PATH }}" --configuration Release --no-restore --nologo --property:ContinuousIntegrationBuild=true
