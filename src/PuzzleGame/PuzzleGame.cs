@@ -50,7 +50,7 @@ public sealed class PuzzleGame : Game
         }
 
         screenManager.AddScreen(
-            new MainMenuScreen(() => new GameplayScreen()),
+            new MainMenuScreen(),
             controllingPlayer: null);
     }
 
