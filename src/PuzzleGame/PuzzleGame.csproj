@@ -28,7 +28,7 @@
     <RemoveDir Directories="$(MSBuildProjectDirectory)\Content\bin\DesktopGL"/>
     <RemoveDir Directories="$(MSBuildProjectDirectory)\Content\obj\DesktopGL"/>
     <Exec WorkingDirectory="$(MSBuildProjectDirectory)\Content"
-          Command="dotnet mgcb /@:Content.mgcb /rebuild /quiet"
+          Command="mgcb /@:Content.mgcb /rebuild /quiet"
           StandardOutputImportance="Low"/>
   </Target>
   <Target Name="CopyMonoGameContent"
